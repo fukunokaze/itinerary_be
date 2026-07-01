@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.9" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\itinerary_be.Core\itinerary_be.Core.csproj" />
+    <ProjectReference Include="..\itinerary_be.Modules.Itinerary\itinerary_be.Modules.Itinerary.csproj" />
+    <ProjectReference Include="..\itinerary_be.Modules.Logistics\itinerary_be.Modules.Logistics.csproj" />
+    <ProjectReference Include="..\itinerary_be.Infrastructure\itinerary_be.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>
