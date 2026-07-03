@@ -1,6 +1,7 @@
 <Solution>
   <Project Path="itinerary_be.Core/itinerary_be.Core.csproj" />
   <Project Path="itinerary_be.Infrastructure/itinerary_be.Infrastructure.csproj" />
+  <Project Path="itinerary_be.Migration/itinerary_be.Migration.csproj" Id="ff7cf510-5561-4f4e-b585-7d9b84dbe762" />
   <Project Path="itinerary_be.Modules.Itinerary/itinerary_be.Modules.Itinerary.csproj" />
   <Project Path="itinerary_be.Modules.Logistics/itinerary_be.Modules.Logistics.csproj" />
   <Project Path="itinerary_be.WebAPI/itinerary_be.WebAPI.csproj" />
