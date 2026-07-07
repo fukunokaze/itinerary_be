@@ -1,21 +1,19 @@
 namespace itinerary_be.WebAPI.Controllers;
 
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using itinerary_be.Infrastructure.Data;
-using itinerary_be.Core.Domain.Entities;
 using itinerary_be.WebAPI.DTOs;
+using itinerary_be.Modules.Itinerary.Interfaces;
 
 [ApiController]
 [Route("api/[controller]")]
 public class TripsController : ControllerBase
 {
-    private readonly ItineraryDbContext _context;
+    private readonly ITripService _tripService;
     private readonly ILogger<TripsController> _logger;
 
-    public TripsController(ItineraryDbContext context, ILogger<TripsController> logger)
+    public TripsController(ITripService tripService, ILogger<TripsController> logger)
     {
-        _context = context;
+        _tripService = tripService;
         _logger = logger;
     }
 
@@ -32,17 +30,7 @@ public class TripsController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        var trip = new Trip
-        {
-            Id = Guid.NewGuid(),
-            Title = createTripDto.Title,
-            StartDate = createTripDto.StartDate,
-            EndDate = createTripDto.EndDate
-        };
-
-        _context.Trips.Add(trip);
-        await _context.SaveChangesAsync();
-
+        var trip = await _tripService.CreateTripAsync(createTripDto.Title, createTripDto.StartDate, createTripDto.EndDate);
         var tripResponseDto = MapToResponseDto(trip);
         return CreatedAtAction(nameof(GetTripById), new { id = trip.Id }, tripResponseDto);
     }
@@ -55,7 +43,7 @@ public class TripsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<TripResponseDto>> GetTripById(Guid id)
     {
-        var trip = await _context.Trips.FindAsync(id);
+        var trip = await _tripService.GetTripByIdAsync(id);
 
         if (trip == null)
         {
@@ -72,7 +60,7 @@ public class TripsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<TripResponseDto>>> GetAllTrips()
     {
-        var trips = await _context.Trips.ToListAsync();
+        var trips = await _tripService.GetAllTripsAsync();
         var tripDtos = trips.Select(MapToResponseDto).ToList();
         return Ok(tripDtos);
     }
@@ -91,19 +79,12 @@ public class TripsController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        var trip = await _context.Trips.FindAsync(id);
+        var trip = await _tripService.UpdateTripAsync(id, updateTripDto.Title, updateTripDto.StartDate, updateTripDto.EndDate);
 
         if (trip == null)
         {
             return NotFound();
         }
-
-        trip.Title = updateTripDto.Title;
-        trip.StartDate = updateTripDto.StartDate;
-        trip.EndDate = updateTripDto.EndDate;
-
-        _context.Trips.Update(trip);
-        await _context.SaveChangesAsync();
 
         return Ok(MapToResponseDto(trip));
     }
@@ -116,20 +97,17 @@ public class TripsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteTrip(Guid id)
     {
-        var trip = await _context.Trips.FindAsync(id);
+        var success = await _tripService.DeleteTripAsync(id);
 
-        if (trip == null)
+        if (!success)
         {
             return NotFound();
         }
 
-        _context.Trips.Remove(trip);
-        await _context.SaveChangesAsync();
-
         return NoContent();
     }
 
-    private static TripResponseDto MapToResponseDto(Trip trip)
+    private static TripResponseDto MapToResponseDto(itinerary_be.Core.Domain.Entities.Trip trip)
     {
         return new TripResponseDto
         {

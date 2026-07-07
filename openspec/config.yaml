@@ -21,6 +21,7 @@ rules:
     - Separate API Data Transfer Objects (DTOs) completely from database entities.
     - Use AutoMapper or similar libraries to map between DTOs and domain models, avoiding direct exposure of database entities in API responses.
     - Make sure the API layer does not contain any business logic; it should delegate to the Application layer for processing.
+    - User Service-Repository pattern in the Application layer to abstract data access and promote testability.
   tasks:
     - Implement the Domain/Data changes first, followed by the Application service layer, and then the Controller.
     - Write corresponding xUnit tests before marking a feature branch as verified.

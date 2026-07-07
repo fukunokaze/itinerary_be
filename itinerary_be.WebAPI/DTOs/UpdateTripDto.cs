@@ -13,4 +13,8 @@ public class UpdateTripDto
 
     [Required(ErrorMessage = "EndDate is required")]
     public DateOnly EndDate { get; set; }
+
+    public string Destination { get; set; } = string.Empty;
+    public string? Description { get; set; } = string.Empty;
+    public string Emoji { get; set; } = string.Empty;
 }

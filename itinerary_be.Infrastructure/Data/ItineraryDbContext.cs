@@ -3,6 +3,7 @@ namespace itinerary_be.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using itinerary_be.Core.Domain.Entities;
 using System.Reflection;
+using itinerary_be.Core.Domain.Enums;
 
 public class ItineraryDbContext(DbContextOptions<ItineraryDbContext> options) : DbContext(options)
 {
@@ -14,6 +15,10 @@ public class ItineraryDbContext(DbContextOptions<ItineraryDbContext> options) : 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.HasDefaultSchema("itinerary");
+
+        modelBuilder.HasPostgresEnum<EventTypes>("event_types");
+
         base.OnModelCreating(modelBuilder);
 
         // Scans the current assembly and applies all IEntityTypeConfiguration implementations

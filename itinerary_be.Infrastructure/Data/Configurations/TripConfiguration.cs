@@ -3,12 +3,13 @@ namespace itinerary_be.Infrastructure.Data.Configurations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using itinerary_be.Core.Domain.Entities;
+using itinerary_be.Core.Domain.Enums;
 
 public class TripConfiguration : IEntityTypeConfiguration<Trip>
 {
     public void Configure(EntityTypeBuilder<Trip> builder)
     {
-        builder.ToTable("Trips");
+        builder.ToTable("trips");
 
         builder.HasKey(t => t.Id);
 
@@ -17,9 +18,13 @@ public class TripConfiguration : IEntityTypeConfiguration<Trip>
                .HasMaxLength(200);
 
         // Relationships
-        builder.HasMany(t => t.ItineraryDays)
-               .WithOne(d => d.Trip)
-               .HasForeignKey(d => d.TripId)
+        // builder.HasMany(t => t.ItineraryDays)
+        //        .WithOne(d => d.Trip)
+        //        .HasForeignKey(d => d.TripId)
+        //        .OnDelete(DeleteBehavior.Cascade);
+        builder.HasMany(t => t.TripEvents)
+               .WithOne(e => e.Trip)
+               .HasForeignKey(e => e.TripId)
                .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasMany(t => t.Flights)
@@ -38,7 +43,7 @@ public class ItineraryDayConfiguration : IEntityTypeConfiguration<ItineraryDay>
 {
     public void Configure(EntityTypeBuilder<ItineraryDay> builder)
     {
-        builder.ToTable("ItineraryDays");
+        builder.ToTable("itinerary_days");
 
         builder.HasKey(d => d.Id);
 
@@ -59,7 +64,7 @@ public class ActivityConfiguration : IEntityTypeConfiguration<Activity>
 {
     public void Configure(EntityTypeBuilder<Activity> builder)
     {
-        builder.ToTable("Activities");
+        builder.ToTable("activities");
 
         builder.HasKey(a => a.Id);
 
@@ -76,7 +81,7 @@ public class FlightConfiguration : IEntityTypeConfiguration<Flight>
 {
     public void Configure(EntityTypeBuilder<Flight> builder)
     {
-        builder.ToTable("Flights");
+        builder.ToTable("flights");
 
         builder.HasKey(f => f.Id);
 
@@ -90,12 +95,32 @@ public class LodgingConfiguration : IEntityTypeConfiguration<Lodging>
 {
     public void Configure(EntityTypeBuilder<Lodging> builder)
     {
-        builder.ToTable("Lodgings");
+        builder.ToTable("lodgings");
 
         builder.HasKey(l => l.Id);
 
         builder.Property(l => l.Name)
                .IsRequired()
                .HasMaxLength(200);
+    }
+}
+
+public class TripEventConfiguration : IEntityTypeConfiguration<TripEvent>
+{
+    public void Configure(EntityTypeBuilder<TripEvent> builder)
+    {
+        builder.ToTable("trip_events");
+
+        builder.HasKey(e => e.Id);
+
+        builder.Property(e => e.Type)
+               .IsRequired();
+
+        // Relationships
+        builder.HasOne(e => e.Trip)
+               .WithMany(t => t.TripEvents)
+               .HasForeignKey(e => e.TripId)
+               .OnDelete(DeleteBehavior.Cascade);
+
     }
 }
