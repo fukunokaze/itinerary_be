@@ -1,0 +1,26 @@
+schema: spec-driven
+
+ Core Web API.
+  Database: Entity Framework Core with PostgreSQL.
+  Architecture: Clean Architecture (Domain, Application, Infrastructure, WebAPI).
+  API Style: RESTful endpoints using Controllers.
+  OpenAPI / Docs: Built-in Microsoft.AspNetCore.OpenAPI paired with Scalar UI.
+  Testing: xUnit and FluentAssertions for Unit & Integration tests.
+
+rules:
+  proposal:
+    - Include a clear database schema migration plan if data models change.
+    - Identify impact on existing middleware pipeline or global filters.
+  specs:
+    - Use Given/When/Then acceptance criteria for all API behavioral features.
+    - Define HTTP Status codes explicitly for success and error paths (e.g., 200 OK, 400 BadRequest, 404 NotFound).
+    - All endpoints paths should be started with "/api" to ensure consistency and avoid route conflicts with static files or other middleware.
+  design:
+    - Favor Strongly-Typed Configuration using the IOptions pattern for appsettings.json binds.
+    - Ensure all public endpoint methods include meaningful XML documentation comments for the OpenAPI generator.
+    - Separate API Data Transfer Objects (DTOs) completely from database entities.
+    - Use AutoMapper or similar libraries to map between DTOs and domain models, avoiding direct exposure of database entities in API responses.
+    - Make sure the API layer does not contain any business logic; it should delegate to the Application layer for processing.
+  tasks:
+    - Implement the Domain/Data changes first, followed by the Application service layer, and then the Controller.
+    - Write corresponding xUnit tests before marking a feature branch as verified.

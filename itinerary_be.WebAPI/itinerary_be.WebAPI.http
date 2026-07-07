@@ -1,6 +1,49 @@
 @itinerary_be.WebAPI_HostAddress = http://localhost:5238
 
+### Weather Forecast
 GET {{itinerary_be.WebAPI_HostAddress}}/weatherforecast/
 Accept: application/json
 
 ###
+
+### Create Trip
+POST {{itinerary_be.WebAPI_HostAddress}}/api/trips
+Content-Type: application/json
+
+{
+  "title": "Summer Vacation 2026",
+  "startDate": "2026-07-15",
+  "endDate": "2026-08-15"
+}
+
+###
+
+### Get All Trips
+GET {{itinerary_be.WebAPI_HostAddress}}/api/trips
+Accept: application/json
+
+###
+
+### Get Trip by ID (replace {tripId} with actual ID)
+GET {{itinerary_be.WebAPI_HostAddress}}/api/trips/{{tripId}}
+Accept: application/json
+
+###
+
+### Update Trip (replace {tripId} with actual ID)
+PUT {{itinerary_be.WebAPI_HostAddress}}/api/trips/{{tripId}}
+Content-Type: application/json
+
+{
+  "title": "Summer Vacation 2026 - Updated",
+  "startDate": "2026-07-20",
+  "endDate": "2026-08-20"
+}
+
+###
+
+### Delete Trip (replace {tripId} with actual ID)
+DELETE {{itinerary_be.WebAPI_HostAddress}}/api/trips/{{tripId}}
+
+###
+

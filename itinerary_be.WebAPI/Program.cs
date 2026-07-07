@@ -1,18 +1,26 @@
+using itinerary_be.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+builder.Services.AddControllers();
+
+// Add DbContext
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnectionString");
+builder.Services.AddDbContext<ItineraryDbContext>(options =>
+    options.UseNpgsql(connectionString));
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    // OpenAPI features can be added here later
 }
 
 app.UseHttpsRedirection();
+app.MapControllers();
 
 var summaries = new[]
 {
