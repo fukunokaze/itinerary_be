@@ -38,22 +38,13 @@ public class DocumentResponseDto
     public required string Icon { get; set; }
 }
 
-/*
- id: string;
-  name: string;
-  address: string;
-  startDate: string;
-  endDate: string;
-  nights: number;
-  confirmationCode?: string;
-*/
 public class LodgingResponseDto
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Address { get; set; } = string.Empty;
-    public DateTime StartDate { get; set; }
-    public DateTime EndDate { get; set; }
+    public DateTime CheckIn { get; set; }
+    public DateTime CheckOut { get; set; }
     public int Nights { get; set; }
     public string? ConfirmationCode { get; set; }
 }

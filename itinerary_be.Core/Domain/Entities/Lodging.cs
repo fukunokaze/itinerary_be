@@ -13,6 +13,9 @@ public class Lodging
     public DateTimeOffset CheckIn { get; set; }
     [Column("check_out")]
     public DateTimeOffset CheckOut { get; set; }
-
+    [Column("address")]
+    public string Address { get; set; } = string.Empty;
+    [Column("confirmation_code")]
+    public string ConfirmationCode { get; set; } = string.Empty;
     public Trip? Trip { get; set; }
 }

@@ -129,7 +129,17 @@ public class TripsController : ControllerBase
                 BookingCode = e.BookingCode,
                 ImageUrl = e.ImageUrl,
                 Tags = e.Tags
-            }).ToList() : new List<TripEventResponseDto>()
+            }).ToList() : new List<TripEventResponseDto>(),
+            Lodgings = trip.Lodgings != null ? trip.Lodgings.Select(l => new LodgingResponseDto
+            {
+                Id = l.Id,
+                Name = l.Name,
+                Address = l.Address,
+                CheckIn = l.CheckIn.DateTime,
+                CheckOut = l.CheckOut.DateTime,
+                Nights = (l.CheckOut.Date - l.CheckIn.Date).Days,
+                ConfirmationCode = l.ConfirmationCode
+            }).ToList() : new List<LodgingResponseDto>()
         };
     }
 }
