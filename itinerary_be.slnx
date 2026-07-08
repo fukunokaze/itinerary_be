@@ -4,5 +4,6 @@
   <Project Path="itinerary_be.Migration/itinerary_be.Migration.csproj" Id="ff7cf510-5561-4f4e-b585-7d9b84dbe762" />
   <Project Path="itinerary_be.Modules.Itinerary/itinerary_be.Modules.Itinerary.csproj" />
   <Project Path="itinerary_be.Modules.Logistics/itinerary_be.Modules.Logistics.csproj" />
+  <Project Path="itinerary_be.UnitTests/itinerary_be.UnitTests.csproj" Id="02012a12-d3a2-41b0-bacd-876f13715187" />
   <Project Path="itinerary_be.WebAPI/itinerary_be.WebAPI.csproj" />
 </Solution>
