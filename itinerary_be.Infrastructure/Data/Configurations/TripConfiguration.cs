@@ -88,6 +88,15 @@ public class FlightConfiguration : IEntityTypeConfiguration<Flight>
         builder.Property(f => f.FlightNumber)
                .IsRequired()
                .HasMaxLength(20);
+
+        builder.Property(f => f.Airline)
+               .HasMaxLength(100);
+
+        builder.Property(f => f.Seat)
+               .HasMaxLength(20);
+
+        builder.Property(f => f.ConfirmationCode)
+               .HasMaxLength(50);
     }
 }
 

@@ -14,5 +14,14 @@ public class Flight
     public DateTimeOffset DepartureTime { get; set; }
     public DateTimeOffset ArrivalTime { get; set; }
 
+    [Column("airline")]
+    public string? Airline { get; set; }
+
+    [Column("seat")]
+    public string? Seat { get; set; }
+
+    [Column("confirmation_code")]
+    public string? ConfirmationCode { get; set; }
+
     public Trip? Trip { get; set; }
 }

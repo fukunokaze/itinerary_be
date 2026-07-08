@@ -15,7 +15,7 @@ public static class EventTypesExtensions
         {
             EventTypes.flight => "flight",
             EventTypes.lodging => "lodging",
-            EventTypes.activity => "actrivity",
+            EventTypes.activity => "activity",
             _ => throw new ArgumentOutOfRangeException(nameof(eventType), eventType, null)
         };
     }
