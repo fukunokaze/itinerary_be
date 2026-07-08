@@ -12,12 +12,13 @@ public class ItineraryDbContext(DbContextOptions<ItineraryDbContext> options) : 
     public DbSet<Activity> Activities => Set<Activity>();
     public DbSet<Flight> Flights => Set<Flight>();
     public DbSet<Lodging> Lodgings => Set<Lodging>();
+    public DbSet<TripEvent> TripEvents => Set<TripEvent>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema("itinerary");
 
-        modelBuilder.HasPostgresEnum<EventTypes>("event_types");
+        modelBuilder.HasPostgresEnum<EventTypes>("event_type");
 
         base.OnModelCreating(modelBuilder);
 

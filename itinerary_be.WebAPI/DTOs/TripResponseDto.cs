@@ -39,34 +39,6 @@ public class DocumentResponseDto
 }
 
 /*
-id: string;
-  type: TripEventType;
-  title: string;
-  date: string;
-  startTime?: string;
-  endTime?: string;
-  location?: string;
-  notes?: string;
-  bookingCode?: string;
-  imageUrl?: string;
-  tags?: string[];
-*/
-public class TripEventResponseDto
-{
-    public Guid Id { get; set; }
-    public required string Type { get; set; }
-    public required string Title { get; set; }
-    public DateTime Date { get; set; }
-    public TimeOnly? StartTime { get; set; }
-    public TimeOnly? EndTime { get; set; }
-    public string? Location { get; set; } = string.Empty;
-    public string? Notes { get; set; } = string.Empty;
-    public string? BookingCode { get; set; } = string.Empty;
-    public string? ImageUrl { get; set; } = string.Empty;
-    public IList<string>? Tags { get; set; } = new List<string>();
-}
-
-/*
  id: string;
   name: string;
   address: string;

@@ -58,3 +58,4 @@ nunit-*.xml
 
 # Visual Studio
 .vs/
+itinerary_be.WebAPI/appsettings.Development.json

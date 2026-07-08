@@ -19,6 +19,9 @@ public static class ItineraryServiceRegistration
     {
         services.AddScoped<ITripRepository, TripRepository>();
         services.AddScoped<ITripService, TripService>();
+        
+        services.AddScoped<ITripEventRepository, TripEventRepository>();
+        services.AddScoped<ITripEventService, TripEventService>();
 
         return services;
     }

@@ -1,3 +1,4 @@
+using itinerary_be.Core.Domain.Enums;
 using itinerary_be.Infrastructure.Data;
 using itinerary_be.Modules.Itinerary;
 using Microsoft.EntityFrameworkCore;
@@ -12,7 +13,7 @@ builder.Services.AddOpenApi();
 // Add DbContext
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnectionString");
 builder.Services.AddDbContext<ItineraryDbContext>(options =>
-    options.UseNpgsql(connectionString));
+    options.UseNpgsql(connectionString, o => o.MapEnum<EventTypes>("event_type", "itinerary")));
 
 // Add Trip services
 builder.Services.AddTripServices();
