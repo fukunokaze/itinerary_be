@@ -3,6 +3,7 @@ namespace itinerary_be.WebAPI.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using itinerary_be.WebAPI.DTOs;
 using itinerary_be.Modules.Itinerary.Interfaces;
+using itinerary_be.Core.Domain.Enums;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -114,7 +115,21 @@ public class TripsController : ControllerBase
             Id = trip.Id,
             Title = trip.Title,
             StartDate = trip.StartDate,
-            EndDate = trip.EndDate
+            EndDate = trip.EndDate,
+            Events = trip.TripEvents != null ? trip.TripEvents.Select(e => new TripEventResponseDto
+            {
+                Id = e.Id,
+                Type = e.Type.ToFriendlyString(),
+                Title = e.Title,
+                Date = e.Date,
+                StartTime = e.StartTime,
+                EndTime = e.EndTime,
+                Location = e.Location,
+                Notes = e.Notes,
+                BookingCode = e.BookingCode,
+                ImageUrl = e.ImageUrl,
+                Tags = e.Tags
+            }).ToList() : new List<TripEventResponseDto>()
         };
     }
 }

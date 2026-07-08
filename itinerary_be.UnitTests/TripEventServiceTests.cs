@@ -33,7 +33,7 @@ public class TripEventServiceTests
         var title = "Test Event";
         var date = DateOnly.FromDateTime(DateTime.UtcNow);
 
-        _mockTripRepository.Setup(r => r.GetByIdAsync(tripId)).ReturnsAsync(new Trip { Id = tripId, Title = "Test Trip" });
+        _mockTripRepository.Setup(r => r.GetByIdAsync(tripId)).ReturnsAsync(new Trip { Id = tripId, Title = "Test Trip", StartDate = date.AddDays(-1), EndDate = date.AddDays(1) });
         _mockEventRepository.Setup(r => r.GetByTripIdAsync(tripId)).ReturnsAsync(new List<TripEvent>());
 
         // Act
@@ -57,26 +57,62 @@ public class TripEventServiceTests
         var startTime = new TimeOnly(10, 0);
         var endTime = new TimeOnly(12, 0);
 
-        _mockTripRepository.Setup(r => r.GetByIdAsync(tripId)).ReturnsAsync(new Trip { Id = tripId, Title = "Test Trip" });
-        
+        _mockTripRepository.Setup(r => r.GetByIdAsync(tripId)).ReturnsAsync(new Trip { Id = tripId, Title = "Test Trip", StartDate = date.AddDays(-1), EndDate = date.AddDays(1) });
+
         var existingEvents = new List<TripEvent>
         {
-            new TripEvent { 
-                Id = Guid.NewGuid(), 
-                TripId = tripId, 
-                Type = EventTypes.activity, 
-                Title = "Existing", 
-                Date = date, 
-                StartTime = new TimeOnly(11, 0), 
-                EndTime = new TimeOnly(13, 0) 
+            new TripEvent {
+                Id = Guid.NewGuid(),
+                TripId = tripId,
+                Type = EventTypes.activity,
+                Title = "Existing",
+                Date = date,
+                StartTime = new TimeOnly(11, 0),
+                EndTime = new TimeOnly(13, 0)
             }
         };
 
         _mockEventRepository.Setup(r => r.GetByTripIdAsync(tripId)).ReturnsAsync(existingEvents);
 
         // Act & Assert
-        await Assert.ThrowsAsync<ArgumentException>(() => 
+        await Assert.ThrowsAsync<ArgumentException>(() =>
             _service.CreateAsync(tripId, type, title, date, startTime, endTime, null, null, null, null, null));
+    }
+
+    [Fact]
+    public async Task CreateAsync_DateBeforeTripStartDate_ThrowsArgumentException()
+    {
+        // Arrange
+        var tripId = Guid.NewGuid();
+        var type = EventTypes.activity;
+        var title = "Test Event";
+        var tripStartDate = DateOnly.FromDateTime(DateTime.UtcNow);
+        var tripEndDate = tripStartDate.AddDays(5);
+        var eventDate = tripStartDate.AddDays(-1);
+
+        _mockTripRepository.Setup(r => r.GetByIdAsync(tripId)).ReturnsAsync(new Trip { Id = tripId, Title = "Test Trip", StartDate = tripStartDate, EndDate = tripEndDate });
+
+        // Act & Assert
+        await Assert.ThrowsAsync<ArgumentException>(() =>
+            _service.CreateAsync(tripId, type, title, eventDate, null, null, null, null, null, null, null));
+    }
+
+    [Fact]
+    public async Task CreateAsync_DateAfterTripEndDate_ThrowsArgumentException()
+    {
+        // Arrange
+        var tripId = Guid.NewGuid();
+        var type = EventTypes.activity;
+        var title = "Test Event";
+        var tripStartDate = DateOnly.FromDateTime(DateTime.UtcNow);
+        var tripEndDate = tripStartDate.AddDays(5);
+        var eventDate = tripEndDate.AddDays(1);
+
+        _mockTripRepository.Setup(r => r.GetByIdAsync(tripId)).ReturnsAsync(new Trip { Id = tripId, Title = "Test Trip", StartDate = tripStartDate, EndDate = tripEndDate });
+
+        // Act & Assert
+        await Assert.ThrowsAsync<ArgumentException>(() =>
+            _service.CreateAsync(tripId, type, title, eventDate, null, null, null, null, null, null, null));
     }
 
     [Fact]

@@ -38,6 +38,12 @@ public class TripEventService : ITripEventService
             throw new ArgumentException($"Trip with ID {tripId} not found");
         }
 
+        // Validate the event date falls within the trip's date range
+        if (date < trip.StartDate || date > trip.EndDate)
+        {
+            throw new ArgumentException($"Event date must be between {trip.StartDate:yyyy-MM-dd} and {trip.EndDate:yyyy-MM-dd}.");
+        }
+
         // Validate overlapping times if both start and end times are provided
         if (startTime.HasValue && endTime.HasValue)
         {

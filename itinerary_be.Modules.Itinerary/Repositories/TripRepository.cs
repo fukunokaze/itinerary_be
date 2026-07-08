@@ -35,7 +35,9 @@ public class TripRepository : ITripRepository
     /// </summary>
     public async Task<Trip?> GetByIdAsync(Guid id)
     {
-        return await _context.Trips.FindAsync(id);
+        return await _context.Trips
+            .Include(t => t.TripEvents)
+            .FirstOrDefaultAsync(t => t.Id == id);
     }
 
     /// <summary>
