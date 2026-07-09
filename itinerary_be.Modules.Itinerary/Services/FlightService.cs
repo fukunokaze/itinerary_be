@@ -42,8 +42,8 @@ public class FlightService : IFlightService
             Id = Guid.NewGuid(),
             TripId = tripId,
             FlightNumber = flightNumber,
-            DepartureTime = departureTime,
-            ArrivalTime = arrivalTime,
+            DepartureTime = departureTime.ToUniversalTime(),
+            ArrivalTime = arrivalTime.ToUniversalTime(),
             Airline = airline,
             Seat = seat,
             ConfirmationCode = confirmationCode
