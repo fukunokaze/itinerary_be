@@ -23,7 +23,8 @@ public class LodgingService : ILodgingService
         DateTimeOffset checkIn,
         DateTimeOffset checkOut,
         string? address,
-        string? confirmationCode)
+        string? confirmationCode,
+        decimal? cost)
     {
         var trip = await _tripRepository.GetByIdAsync(tripId);
         if (trip == null)
@@ -44,7 +45,8 @@ public class LodgingService : ILodgingService
             CheckIn = checkIn.ToUniversalTime(),
             CheckOut = checkOut.ToUniversalTime(),
             Address = address ?? string.Empty,
-            ConfirmationCode = confirmationCode ?? string.Empty
+            ConfirmationCode = confirmationCode ?? string.Empty,
+            Cost = cost
         };
 
         await _repository.CreateAsync(lodging);

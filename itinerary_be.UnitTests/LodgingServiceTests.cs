@@ -41,7 +41,7 @@ public class LodgingServiceTests
         });
 
         // Act
-        var result = await _service.CreateAsync(tripId, name, checkIn, checkOut, "123 Main St", "CONF123");
+        var result = await _service.CreateAsync(tripId, name, checkIn, checkOut, "123 Main St", "CONF123", null);
 
         // Assert
         Assert.NotNull(result);
@@ -64,7 +64,7 @@ public class LodgingServiceTests
 
         // Act & Assert
         await Assert.ThrowsAsync<ArgumentException>(() =>
-            _service.CreateAsync(tripId, "Test Hotel", checkIn, checkOut, null, null));
+            _service.CreateAsync(tripId, "Test Hotel", checkIn, checkOut, null, null, null));
     }
 
     [Fact]
@@ -85,7 +85,7 @@ public class LodgingServiceTests
 
         // Act & Assert
         await Assert.ThrowsAsync<ArgumentException>(() =>
-            _service.CreateAsync(tripId, "Test Hotel", checkIn, checkOut, null, null));
+            _service.CreateAsync(tripId, "Test Hotel", checkIn, checkOut, null, null, null));
     }
 
     [Fact]

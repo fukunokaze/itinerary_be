@@ -45,7 +45,8 @@ public class TripEventsController : ControllerBase
                 createTripEventDto.Notes,
                 createTripEventDto.BookingCode,
                 null,
-                null
+                null,
+                createTripEventDto.Cost
             );
 
             var tripEventResponseDto = MapToResponseDto(tripEvent);
@@ -103,7 +104,8 @@ public class TripEventsController : ControllerBase
             Notes = tripEvent.Notes,
             BookingCode = tripEvent.BookingCode,
             ImageUrl = tripEvent.ImageUrl,
-            Tags = tripEvent.Tags
+            Tags = tripEvent.Tags,
+            Cost = tripEvent.Cost
         };
     }
 }

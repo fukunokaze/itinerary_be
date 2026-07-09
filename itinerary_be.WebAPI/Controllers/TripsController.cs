@@ -128,7 +128,8 @@ public class TripsController : ControllerBase
                 Notes = e.Notes,
                 BookingCode = e.BookingCode,
                 ImageUrl = e.ImageUrl,
-                Tags = e.Tags
+                Tags = e.Tags,
+                Cost = e.Cost
             }).ToList() : new List<TripEventResponseDto>(),
             Lodgings = trip.Lodgings != null ? trip.Lodgings.Select(l => new LodgingResponseDto
             {
@@ -138,7 +139,8 @@ public class TripsController : ControllerBase
                 CheckIn = l.CheckIn.DateTime,
                 CheckOut = l.CheckOut.DateTime,
                 Nights = (l.CheckOut.Date - l.CheckIn.Date).Days,
-                ConfirmationCode = l.ConfirmationCode
+                ConfirmationCode = l.ConfirmationCode,
+                Cost = l.Cost
             }).ToList() : new List<LodgingResponseDto>(),
             Flights = trip.Flights != null ? trip.Flights.Select(f => new FlightResponseDto
             {
@@ -150,7 +152,8 @@ public class TripsController : ControllerBase
                 Airline = f.Airline,
                 Seat = f.Seat,
                 Route = f.Route,
-                ConfirmationCode = f.ConfirmationCode
+                ConfirmationCode = f.ConfirmationCode,
+                Cost = f.Cost
             }).ToList() : new List<FlightResponseDto>()
         };
     }

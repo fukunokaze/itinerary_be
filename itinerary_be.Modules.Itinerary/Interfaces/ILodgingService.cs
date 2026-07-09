@@ -10,7 +10,8 @@ public interface ILodgingService
         DateTimeOffset checkIn,
         DateTimeOffset checkOut,
         string? address,
-        string? confirmationCode);
+        string? confirmationCode,
+        decimal? cost);
 
     Task<Lodging?> GetByIdAsync(Guid id);
 

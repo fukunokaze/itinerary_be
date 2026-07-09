@@ -41,7 +41,7 @@ public class FlightServiceTests
         });
 
         // Act
-        var result = await _service.CreateAsync(tripId, flightNumber, departureTime, arrivalTime, "Airline", "1A", "CONF123");
+        var result = await _service.CreateAsync(tripId, flightNumber, departureTime, arrivalTime, "Airline", "1A", "CONF123", null, null);
 
         // Assert
         Assert.NotNull(result);
@@ -62,7 +62,7 @@ public class FlightServiceTests
 
         // Act & Assert
         await Assert.ThrowsAsync<ArgumentException>(() =>
-            _service.CreateAsync(tripId, "AB123", departureTime, arrivalTime, null, null, null));
+            _service.CreateAsync(tripId, "AB123", departureTime, arrivalTime, null, null, null, null, null));
     }
 
     [Fact]
@@ -83,7 +83,7 @@ public class FlightServiceTests
 
         // Act & Assert
         await Assert.ThrowsAsync<ArgumentException>(() =>
-            _service.CreateAsync(tripId, "AB123", departureTime, arrivalTime, null, null, null));
+            _service.CreateAsync(tripId, "AB123", departureTime, arrivalTime, null, null, null, null, null));
     }
 
     [Fact]

@@ -29,5 +29,8 @@ public class Flight
     [Column("route")]
     public string? Route { get; set; }
 
+    [Column("cost")]
+    public decimal? Cost { get; set; }
+
     public Trip? Trip { get; set; }
 }

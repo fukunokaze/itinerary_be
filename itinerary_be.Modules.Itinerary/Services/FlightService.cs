@@ -25,7 +25,8 @@ public class FlightService : IFlightService
         string? airline,
         string? seat,
         string? confirmationCode,
-        string? route)
+        string? route,
+        decimal? cost)
     {
         var trip = await _tripRepository.GetByIdAsync(tripId);
         if (trip == null)
@@ -48,7 +49,8 @@ public class FlightService : IFlightService
             Airline = airline,
             Seat = seat,
             ConfirmationCode = confirmationCode,
-            Route = route
+            Route = route,
+            Cost = cost
         };
 
         await _repository.CreateAsync(flight);

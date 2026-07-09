@@ -47,6 +47,7 @@ public class LodgingResponseDto
     public DateTime CheckOut { get; set; }
     public int Nights { get; set; }
     public string? ConfirmationCode { get; set; }
+    public decimal? Cost { get; set; }
 }
 
 public class FlightResponseDto
@@ -60,4 +61,5 @@ public class FlightResponseDto
     public string? Seat { get; set; }
     public string? ConfirmationCode { get; set; }
     public string? Route { get; set; }
+    public decimal? Cost { get; set; }
 }

@@ -37,7 +37,7 @@ public class TripEventServiceTests
         _mockEventRepository.Setup(r => r.GetByTripIdAsync(tripId)).ReturnsAsync(new List<TripEvent>());
 
         // Act
-        var result = await _service.CreateAsync(tripId, type, title, date, null, null, null, null, null, null, null);
+        var result = await _service.CreateAsync(tripId, type, title, date, null, null, null, null, null, null, null, null);
 
         // Assert
         Assert.NotNull(result);
@@ -76,7 +76,7 @@ public class TripEventServiceTests
 
         // Act & Assert
         await Assert.ThrowsAsync<ArgumentException>(() =>
-            _service.CreateAsync(tripId, type, title, date, startTime, endTime, null, null, null, null, null));
+            _service.CreateAsync(tripId, type, title, date, startTime, endTime, null, null, null, null, null, null));
     }
 
     [Fact]
@@ -94,7 +94,7 @@ public class TripEventServiceTests
 
         // Act & Assert
         await Assert.ThrowsAsync<ArgumentException>(() =>
-            _service.CreateAsync(tripId, type, title, eventDate, null, null, null, null, null, null, null));
+            _service.CreateAsync(tripId, type, title, eventDate, null, null, null, null, null, null, null, null));
     }
 
     [Fact]
@@ -112,7 +112,7 @@ public class TripEventServiceTests
 
         // Act & Assert
         await Assert.ThrowsAsync<ArgumentException>(() =>
-            _service.CreateAsync(tripId, type, title, eventDate, null, null, null, null, null, null, null));
+            _service.CreateAsync(tripId, type, title, eventDate, null, null, null, null, null, null, null, null));
     }
 
     [Fact]

@@ -20,4 +20,6 @@ public class CreateFlightDto
     public string? ConfirmationCode { get; set; }
 
     public string? Route { get; set; }
+
+    public decimal? Cost { get; set; }
 }

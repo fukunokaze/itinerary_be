@@ -12,7 +12,8 @@ public interface IFlightService
         string? airline,
         string? seat,
         string? confirmationCode,
-        string? route);
+        string? route,
+        decimal? cost);
 
     Task<Flight?> GetByIdAsync(Guid id);
 

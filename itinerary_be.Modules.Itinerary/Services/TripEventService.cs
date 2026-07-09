@@ -29,7 +29,8 @@ public class TripEventService : ITripEventService
         string? notes, 
         string? bookingCode, 
         string? imageUrl, 
-        string? tags)
+        string? tags,
+        decimal? cost)
     {
         // Verify the trip exists
         var trip = await _tripRepository.GetByIdAsync(tripId);
@@ -74,7 +75,8 @@ public class TripEventService : ITripEventService
             Notes = notes,
             BookingCode = bookingCode,
             ImageUrl = imageUrl,
-            Tags = tags
+            Tags = tags,
+            Cost = cost
         };
 
         await _repository.CreateAsync(tripEvent);

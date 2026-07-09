@@ -47,6 +47,8 @@ public class TripEvent
     public string? ImageUrl { get; set; } = string.Empty;
     [Column ("tags")]
     public string? Tags { get; set; } = string.Empty;
+    [Column ("cost")]
+    public decimal? Cost { get; set; }
     // public List<Guid>? TravelerIds { get; set; } = new List<Guid>();
     // public List<Guid>? RelatedItemIds { get; set; } = new List<Guid>();
 

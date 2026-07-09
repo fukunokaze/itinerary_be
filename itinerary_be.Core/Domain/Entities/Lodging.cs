@@ -17,5 +17,7 @@ public class Lodging
     public string Address { get; set; } = string.Empty;
     [Column("confirmation_code")]
     public string ConfirmationCode { get; set; } = string.Empty;
+    [Column("cost")]
+    public decimal? Cost { get; set; }
     public Trip? Trip { get; set; }
 }

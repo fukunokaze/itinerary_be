@@ -16,7 +16,8 @@ public interface ITripEventService
         string? notes, 
         string? bookingCode, 
         string? imageUrl, 
-        string? tags);
+        string? tags,
+        decimal? cost);
     
     Task<TripEvent?> GetByIdAsync(Guid id);
     

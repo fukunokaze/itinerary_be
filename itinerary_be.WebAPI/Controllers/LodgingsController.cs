@@ -39,7 +39,8 @@ public class LodgingsController : ControllerBase
                 createLodgingDto.CheckIn,
                 createLodgingDto.CheckOut,
                 createLodgingDto.Address,
-                createLodgingDto.ConfirmationCode
+                createLodgingDto.ConfirmationCode,
+                createLodgingDto.Cost
             );
 
             var lodgingResponseDto = MapToResponseDto(lodging);
@@ -92,7 +93,8 @@ public class LodgingsController : ControllerBase
             CheckIn = lodging.CheckIn.DateTime,
             CheckOut = lodging.CheckOut.DateTime,
             Nights = (lodging.CheckOut.Date - lodging.CheckIn.Date).Days,
-            ConfirmationCode = lodging.ConfirmationCode
+            ConfirmationCode = lodging.ConfirmationCode,
+            Cost = lodging.Cost
         };
     }
 }

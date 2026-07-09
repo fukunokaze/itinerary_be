@@ -16,4 +16,6 @@ public class CreateLodgingDto
     public string? Address { get; set; }
 
     public string? ConfirmationCode { get; set; }
+
+    public decimal? Cost { get; set; }
 }

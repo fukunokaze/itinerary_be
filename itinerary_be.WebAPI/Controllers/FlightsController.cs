@@ -40,7 +40,8 @@ public class FlightsController : ControllerBase
                 createFlightDto.Airline,
                 createFlightDto.Seat,
                 createFlightDto.ConfirmationCode,
-                createFlightDto.Route
+                createFlightDto.Route,
+                createFlightDto.Cost
             );
 
             var flightResponseDto = MapToResponseDto(flight);
@@ -95,7 +96,8 @@ public class FlightsController : ControllerBase
             Airline = flight.Airline,
             Seat = flight.Seat,
             ConfirmationCode = flight.ConfirmationCode,
-            Route = flight.Route
+            Route = flight.Route,
+            Cost = flight.Cost
         };
     }
 }

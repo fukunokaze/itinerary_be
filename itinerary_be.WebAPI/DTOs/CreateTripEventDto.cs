@@ -31,4 +31,5 @@ public class CreateTripEventDto
 
     public List<string>? RelatedItemIds { get; set; } = new List<string>();
 
+    public decimal? Cost { get; set; }
 }

@@ -27,4 +27,6 @@ public class TripEventResponseDto
     public string? ImageUrl { get; set; }
     
     public string? Tags { get; set; }
+    
+    public decimal? Cost { get; set; }
 }
