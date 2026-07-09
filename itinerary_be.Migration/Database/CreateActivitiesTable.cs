@@ -2,7 +2,7 @@ using FluentMigrator;
 
 namespace itinerary_be.Migration.Database
 {
-    [Migration(2023091504, "Create Activities Table")]
+    [Migration(20260701000005, "Create Activities Table")]
     public class CreateActivitiesTable : FluentMigrator.Migration
     {
         public override void Up()

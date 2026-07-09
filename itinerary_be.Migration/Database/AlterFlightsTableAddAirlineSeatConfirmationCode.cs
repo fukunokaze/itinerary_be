@@ -2,7 +2,7 @@ using FluentMigrator;
 
 namespace itinerary_be.Migration.Database
 {
-    [Migration(202607081456, "Alter Flights Table Add Airline Seat Confirmation Code")]
+    [Migration(20260708145601, "Alter Flights Table Add Airline Seat Confirmation Code")]
     public class AlterFlightsTableAddAirlineSeatConfirmationCode : FluentMigrator.Migration
     {
         public override void Up()

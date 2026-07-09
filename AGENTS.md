@@ -22,3 +22,4 @@
   - Public methods in logic services must have unit tests.
   - Unit test naming should follow the `NameOfMethod_Scenario_ExpectedResult` format.
   - Use `WebApplicationFactory` for integration testing.
+- When Creating Migration file use "yyyyMMddHHmmXX" format for the Migration version. XX is the iteration number if there is same version, start from 01

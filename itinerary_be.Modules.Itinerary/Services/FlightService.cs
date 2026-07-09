@@ -24,7 +24,8 @@ public class FlightService : IFlightService
         DateTimeOffset arrivalTime,
         string? airline,
         string? seat,
-        string? confirmationCode)
+        string? confirmationCode,
+        string? route)
     {
         var trip = await _tripRepository.GetByIdAsync(tripId);
         if (trip == null)
@@ -46,7 +47,8 @@ public class FlightService : IFlightService
             ArrivalTime = arrivalTime.ToUniversalTime(),
             Airline = airline,
             Seat = seat,
-            ConfirmationCode = confirmationCode
+            ConfirmationCode = confirmationCode,
+            Route = route
         };
 
         await _repository.CreateAsync(flight);

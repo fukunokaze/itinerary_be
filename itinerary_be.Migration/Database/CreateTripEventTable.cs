@@ -2,7 +2,7 @@ using FluentMigrator;
 
 namespace itinerary_be.Migration;
 
-[Migration(202607071404, "Create Trip Event Table")]
+[Migration(20260707140401, "Create Trip Event Table")]
 public class CreateTripEventTable : FluentMigrator.Migration
 {
     public override void Up()

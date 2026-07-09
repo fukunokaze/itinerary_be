@@ -17,5 +17,7 @@ public class CreateFlightDtoValidator : AbstractValidator<CreateFlightDto>
         RuleFor(x => x.Seat).MaximumLength(20).WithMessage("Seat must not exceed 20 characters.");
 
         RuleFor(x => x.ConfirmationCode).MaximumLength(50).WithMessage("ConfirmationCode must not exceed 50 characters.");
+
+        RuleFor(x => x.Route).MaximumLength(500).WithMessage("Route must not exceed 500 characters.");
     }
 }

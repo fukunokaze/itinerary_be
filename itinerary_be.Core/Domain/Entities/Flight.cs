@@ -26,5 +26,8 @@ public class Flight
     [Column("confirmation_code")]
     public string? ConfirmationCode { get; set; }
 
+    [Column("route")]
+    public string? Route { get; set; }
+
     public Trip? Trip { get; set; }
 }

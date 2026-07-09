@@ -59,4 +59,5 @@ public class FlightResponseDto
     public string? Airline { get; set; }
     public string? Seat { get; set; }
     public string? ConfirmationCode { get; set; }
+    public string? Route { get; set; }
 }

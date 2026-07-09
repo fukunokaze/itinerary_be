@@ -39,7 +39,8 @@ public class FlightsController : ControllerBase
                 createFlightDto.ArrivalTime,
                 createFlightDto.Airline,
                 createFlightDto.Seat,
-                createFlightDto.ConfirmationCode
+                createFlightDto.ConfirmationCode,
+                createFlightDto.Route
             );
 
             var flightResponseDto = MapToResponseDto(flight);
@@ -93,7 +94,8 @@ public class FlightsController : ControllerBase
             ArrivalTime = flight.ArrivalTime,
             Airline = flight.Airline,
             Seat = flight.Seat,
-            ConfirmationCode = flight.ConfirmationCode
+            ConfirmationCode = flight.ConfirmationCode,
+            Route = flight.Route
         };
     }
 }

@@ -149,6 +149,7 @@ public class TripsController : ControllerBase
                 ArrivalTime = f.ArrivalTime,
                 Airline = f.Airline,
                 Seat = f.Seat,
+                Route = f.Route,
                 ConfirmationCode = f.ConfirmationCode
             }).ToList() : new List<FlightResponseDto>()
         };

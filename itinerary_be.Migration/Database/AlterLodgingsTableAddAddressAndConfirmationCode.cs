@@ -2,7 +2,7 @@ using FluentMigrator;
 
 namespace itinerary_be.Migration.Database;
 
-[Migration(202607081500, "Alter Lodgings Table Add Address, Confirmation Code and Trip FK")]
+[Migration(20260708150001, "Alter Lodgings Table Add Address, Confirmation Code and Trip FK")]
 public class AlterLodgingsTableAddAddressAndConfirmationCode : FluentMigrator.Migration
 {
     public override void Up()

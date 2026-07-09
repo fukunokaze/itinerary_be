@@ -2,7 +2,7 @@
 
 namespace itinerary_be.Migration.Database
 {
-    [Migration(2023091501, "Create Lodgings Table")]
+    [Migration(20260701000002, "Create Lodgings Table")]
     public class CreateLodgingsTable : FluentMigrator.Migration
     {
         public override void Up()

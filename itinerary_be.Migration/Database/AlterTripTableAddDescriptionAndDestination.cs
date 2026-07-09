@@ -2,7 +2,7 @@ using FluentMigrator;
 
 namespace itinerary_be.Migration.Database;
 
-[Migration(202606061251, "Alter Trip Table Add Description and Destination")]
+[Migration(20260706125101, "Alter Trip Table Add Description and Destination")]
 public class AlterTripTableAddDescriptionAndDestination : FluentMigrator.Migration
 {
     public override void Up()

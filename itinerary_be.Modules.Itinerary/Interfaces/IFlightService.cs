@@ -11,7 +11,8 @@ public interface IFlightService
         DateTimeOffset arrivalTime,
         string? airline,
         string? seat,
-        string? confirmationCode);
+        string? confirmationCode,
+        string? route);
 
     Task<Flight?> GetByIdAsync(Guid id);
 
