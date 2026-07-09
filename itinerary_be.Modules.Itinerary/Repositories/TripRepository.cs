@@ -38,6 +38,7 @@ public class TripRepository : ITripRepository
         return await _context.Trips
             .Include(t => t.TripEvents)
             .Include(t => t.Lodgings)
+            .Include(t => t.Flights)
             .FirstOrDefaultAsync(t => t.Id == id);
     }
 

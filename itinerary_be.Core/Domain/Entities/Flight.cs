@@ -11,7 +11,10 @@ public class Flight
     public required string FlightNumber { get; set; }
 
     // DateTimeOffset is highly recommended for PostgreSQL timezone handling
+    [Column("departure_time")]
     public DateTimeOffset DepartureTime { get; set; }
+    
+    [Column("arrival_time")]
     public DateTimeOffset ArrivalTime { get; set; }
 
     [Column("airline")]

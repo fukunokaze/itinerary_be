@@ -26,6 +26,9 @@ public static class ItineraryServiceRegistration
         services.AddScoped<ILodgingRepository, LodgingRepository>();
         services.AddScoped<ILodgingService, LodgingService>();
 
+        services.AddScoped<IFlightRepository, FlightRepository>();
+        services.AddScoped<IFlightService, FlightService>();
+
         return services;
     }
 }

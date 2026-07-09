@@ -49,22 +49,14 @@ public class LodgingResponseDto
     public string? ConfirmationCode { get; set; }
 }
 
-/*
- id: string;
-  route: string;
-  airline: string;
-  flightNumber: string;
-  date: string;
-  seat?: string;
-  confirmationCode?: string;
-*/
 public class FlightResponseDto
 {
     public Guid Id { get; set; }
-    public string Route { get; set; } = string.Empty;
-    public string Airline { get; set; } = string.Empty;
+    public Guid TripId { get; set; }
     public string FlightNumber { get; set; } = string.Empty;
-    public DateTime Date { get; set; }
+    public DateTimeOffset DepartureTime { get; set; }
+    public DateTimeOffset ArrivalTime { get; set; }
+    public string? Airline { get; set; }
     public string? Seat { get; set; }
     public string? ConfirmationCode { get; set; }
 }
