@@ -1,13 +1,15 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>7a97a5af-4767-4ab0-8302-e46d01b9eec4</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.9" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.9" />
     <PackageReference Include="Microsoft.OpenApi" Version="2.7.5" />
     <PackageReference Include="Scalar.AspNetCore" Version="2.16.10" />
@@ -15,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\itinerary_be.Core\itinerary_be.Core.csproj" />
+    <ProjectReference Include="..\itinerary_be.Modules.Auth\itinerary_be.Modules.Auth.csproj" />
     <ProjectReference Include="..\itinerary_be.Modules.Itinerary\itinerary_be.Modules.Itinerary.csproj" />
     <ProjectReference Include="..\itinerary_be.Modules.Logistics\itinerary_be.Modules.Logistics.csproj" />
     <ProjectReference Include="..\itinerary_be.Infrastructure\itinerary_be.Infrastructure.csproj" />
