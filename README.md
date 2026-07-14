@@ -1,6 +1,10 @@
 # itinerary_be
 Repository for My Itinerary backend
 
+## Authentication
+
+The API authenticates users via Google Sign-In (ID token verification) and issues its own JWT for subsequent requests. All endpoints require this token except `POST /api/auth/google`. See [docs/google-oauth-setup.md](docs/google-oauth-setup.md) for Google Cloud Console setup and local secret configuration.
+
 ## Architecture Overview
 
 This project follows Clean Architecture principles with clear separation of concerns:

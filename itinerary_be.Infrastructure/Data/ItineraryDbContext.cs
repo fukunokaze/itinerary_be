@@ -13,6 +13,7 @@ public class ItineraryDbContext(DbContextOptions<ItineraryDbContext> options) : 
     public DbSet<Flight> Flights => Set<Flight>();
     public DbSet<Lodging> Lodgings => Set<Lodging>();
     public DbSet<TripEvent> TripEvents => Set<TripEvent>();
+    public DbSet<User> Users => Set<User>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
