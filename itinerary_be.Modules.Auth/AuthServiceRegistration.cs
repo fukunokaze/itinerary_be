@@ -11,9 +11,17 @@ public static class AuthServiceRegistration
 {
     public static IServiceCollection AddAuthServices(this IServiceCollection services, IConfiguration configuration)
     {
-        services.Configure<GoogleAuthOptions>(configuration.GetSection("Google"));
-        services.Configure<JwtOptions>(configuration.GetSection("Jwt"));
+        services.AddOptions<GoogleAuthOptions>()
+            .Bind(configuration.GetSection("Google"))
+            .Validate(o => !string.IsNullOrWhiteSpace(o.ClientId), "Google:ClientId is required.")
+            .ValidateOnStart();
 
+        services.AddOptions<JwtOptions>()
+            .Bind(configuration.GetSection("Jwt"))
+            .Validate(o => !string.IsNullOrWhiteSpace(o.Secret), "Jwt:Secret is required.")
+            .Validate(o => !string.IsNullOrWhiteSpace(o.Issuer), "Jwt:Issuer is required.")
+            .Validate(o => !string.IsNullOrWhiteSpace(o.Audience), "Jwt:Audience is required.")
+            .ValidateOnStart();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IGoogleTokenValidator, GoogleTokenValidator>();
