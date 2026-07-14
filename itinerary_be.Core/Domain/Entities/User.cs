@@ -11,4 +11,6 @@ public class User
     public required string Name { get; set; }
     [Column("created_at")]
     public DateTime CreatedAt { get; set; }
+
+    public ICollection<Trip> Trips { get; set; } = new List<Trip>();
 }

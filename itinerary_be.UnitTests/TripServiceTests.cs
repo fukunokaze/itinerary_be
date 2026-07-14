@@ -28,6 +28,7 @@ public class TripServiceTests
     public async Task CreateTripAsync_WithValidInput_CreatesAndReturnsTripSuccessfully()
     {
         // Arrange
+        var userId = Guid.NewGuid();
         var title = "Summer Vacation";
         var startDate = new DateOnly(2026, 06, 01);
         var endDate = new DateOnly(2026, 06, 15);
@@ -35,17 +36,18 @@ public class TripServiceTests
         var description = "A beautiful summer trip";
 
         // Act
-        var result = await _tripService.CreateTripAsync(title, startDate, endDate, destination, description);
+        var result = await _tripService.CreateTripAsync(userId, title, startDate, endDate, destination, description);
 
         // Assert
         Assert.NotNull(result);
         Assert.NotEqual(Guid.Empty, result.Id);
+        Assert.Equal(userId, result.UserId);
         Assert.Equal(title, result.Title);
         Assert.Equal(startDate, result.StartDate);
         Assert.Equal(endDate, result.EndDate);
         Assert.Equal(destination, result.Destination);
         Assert.Equal(description, result.Description);
-        
+
         _mockRepository.Verify(r => r.CreateAsync(It.IsAny<Trip>()), Times.Once);
         _mockLogger.Verify(l => l.Log(
             LogLevel.Information,
@@ -60,12 +62,13 @@ public class TripServiceTests
     public async Task CreateTripAsync_WithMinimalInput_CreatesWithDefaultValues()
     {
         // Arrange
+        var userId = Guid.NewGuid();
         var title = "Quick Trip";
         var startDate = new DateOnly(2026, 07, 01);
         var endDate = new DateOnly(2026, 07, 02);
 
         // Act
-        var result = await _tripService.CreateTripAsync(title, startDate, endDate);
+        var result = await _tripService.CreateTripAsync(userId, title, startDate, endDate);
 
         // Assert
         Assert.NotNull(result);
@@ -80,16 +83,17 @@ public class TripServiceTests
     public async Task CreateTripAsync_RepositoryThrowsException_ExceptionPropagates()
     {
         // Arrange
+        var userId = Guid.NewGuid();
         var title = "Test Trip";
         var startDate = new DateOnly(2026, 07, 01);
         var endDate = new DateOnly(2026, 07, 02);
-        
+
         _mockRepository.Setup(r => r.CreateAsync(It.IsAny<Trip>()))
             .ThrowsAsync(new InvalidOperationException("Database error"));
 
         // Act & Assert
-        await Assert.ThrowsAsync<InvalidOperationException>(() => 
-            _tripService.CreateTripAsync(title, startDate, endDate));
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            _tripService.CreateTripAsync(userId, title, startDate, endDate));
     }
 
     #endregion
@@ -170,21 +174,22 @@ public class TripServiceTests
     #region GetAllTripsAsync Tests
 
     [Fact]
-    public async Task GetAllTripsAsync_WithExistingTrips_ReturnsAllTrips()
+    public async Task GetAllTripsAsync_WithExistingTrips_ReturnsAllTripsForUser()
     {
         // Arrange
+        var userId = Guid.NewGuid();
         var trips = new List<Trip>
         {
-            new() { Id = Guid.NewGuid(), Title = "Trip 1", StartDate = new DateOnly(2026, 07, 01), EndDate = new DateOnly(2026, 07, 10) },
-            new() { Id = Guid.NewGuid(), Title = "Trip 2", StartDate = new DateOnly(2026, 08, 01), EndDate = new DateOnly(2026, 08, 10) },
-            new() { Id = Guid.NewGuid(), Title = "Trip 3", StartDate = new DateOnly(2026, 09, 01), EndDate = new DateOnly(2026, 09, 10) }
+            new() { Id = Guid.NewGuid(), UserId = userId, Title = "Trip 1", StartDate = new DateOnly(2026, 07, 01), EndDate = new DateOnly(2026, 07, 10) },
+            new() { Id = Guid.NewGuid(), UserId = userId, Title = "Trip 2", StartDate = new DateOnly(2026, 08, 01), EndDate = new DateOnly(2026, 08, 10) },
+            new() { Id = Guid.NewGuid(), UserId = userId, Title = "Trip 3", StartDate = new DateOnly(2026, 09, 01), EndDate = new DateOnly(2026, 09, 10) }
         };
 
-        _mockRepository.Setup(r => r.GetAllAsync())
+        _mockRepository.Setup(r => r.GetAllAsync(userId))
             .ReturnsAsync(trips);
 
         // Act
-        var result = await _tripService.GetAllTripsAsync();
+        var result = await _tripService.GetAllTripsAsync(userId);
 
         // Assert
         Assert.NotNull(result);
@@ -192,37 +197,39 @@ public class TripServiceTests
         Assert.Contains(result, t => t.Title == "Trip 1");
         Assert.Contains(result, t => t.Title == "Trip 2");
         Assert.Contains(result, t => t.Title == "Trip 3");
-        
-        _mockRepository.Verify(r => r.GetAllAsync(), Times.Once);
+
+        _mockRepository.Verify(r => r.GetAllAsync(userId), Times.Once);
     }
 
     [Fact]
     public async Task GetAllTripsAsync_WithNoTrips_ReturnsEmptyList()
     {
         // Arrange
-        _mockRepository.Setup(r => r.GetAllAsync())
+        var userId = Guid.NewGuid();
+        _mockRepository.Setup(r => r.GetAllAsync(userId))
             .ReturnsAsync(new List<Trip>());
 
         // Act
-        var result = await _tripService.GetAllTripsAsync();
+        var result = await _tripService.GetAllTripsAsync(userId);
 
         // Assert
         Assert.NotNull(result);
         Assert.Empty(result);
-        
-        _mockRepository.Verify(r => r.GetAllAsync(), Times.Once);
+
+        _mockRepository.Verify(r => r.GetAllAsync(userId), Times.Once);
     }
 
     [Fact]
     public async Task GetAllTripsAsync_RepositoryThrowsException_ExceptionPropagates()
     {
         // Arrange
-        _mockRepository.Setup(r => r.GetAllAsync())
+        var userId = Guid.NewGuid();
+        _mockRepository.Setup(r => r.GetAllAsync(userId))
             .ThrowsAsync(new InvalidOperationException("Database error"));
 
         // Act & Assert
-        await Assert.ThrowsAsync<InvalidOperationException>(() => 
-            _tripService.GetAllTripsAsync());
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            _tripService.GetAllTripsAsync(userId));
     }
 
     #endregion

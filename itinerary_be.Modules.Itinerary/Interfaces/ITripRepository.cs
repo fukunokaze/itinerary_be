@@ -18,9 +18,9 @@ public interface ITripRepository
     Task<Trip?> GetByIdAsync(Guid id);
 
     /// <summary>
-    /// Retrieve all Trips from the database
+    /// Retrieve all Trips belonging to a given user from the database
     /// </summary>
-    Task<List<Trip>> GetAllAsync();
+    Task<List<Trip>> GetAllAsync(Guid userId);
 
     /// <summary>
     /// Update an existing Trip

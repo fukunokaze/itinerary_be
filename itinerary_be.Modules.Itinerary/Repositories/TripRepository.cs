@@ -43,11 +43,13 @@ public class TripRepository : ITripRepository
     }
 
     /// <summary>
-    /// Retrieve all Trips from the database
+    /// Retrieve all Trips belonging to a given user from the database
     /// </summary>
-    public async Task<List<Trip>> GetAllAsync()
+    public async Task<List<Trip>> GetAllAsync(Guid userId)
     {
-        return await _context.Trips.ToListAsync();
+        return await _context.Trips
+            .Where(t => t.UserId == userId)
+            .ToListAsync();
     }
 
     /// <summary>

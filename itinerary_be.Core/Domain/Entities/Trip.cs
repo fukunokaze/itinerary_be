@@ -15,9 +15,12 @@ public class Trip
     public string Destination { get; set; } = string.Empty;
     [Column("description")]
     public string? Description { get; set; } = string.Empty;
+    [Column("user_id")]
+    public Guid UserId { get; set; }
 
     // Navigation Properties
     // public ICollection<ItineraryDay> ItineraryDays { get; set; } = new List<ItineraryDay>();
+    public User? User { get; set; }
     public ICollection<Flight> Flights { get; set; } = new List<Flight>();
     public ICollection<Lodging> Lodgings { get; set; } = new List<Lodging>();
     public ICollection<TripEvent> TripEvents { get; set; } = new List<TripEvent>();

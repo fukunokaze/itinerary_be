@@ -24,13 +24,14 @@ public class TripService : ITripService
     }
 
     /// <summary>
-    /// Create a new Trip
+    /// Create a new Trip owned by the given user
     /// </summary>
-    public async Task<Trip> CreateTripAsync(string title, DateOnly startDate, DateOnly endDate, string destination = "", string? description = "")
+    public async Task<Trip> CreateTripAsync(Guid userId, string title, DateOnly startDate, DateOnly endDate, string destination = "", string? description = "")
     {
         var trip = new Trip
         {
             Id = Guid.NewGuid(),
+            UserId = userId,
             Title = title,
             Destination = destination,
             Description = description,
@@ -61,11 +62,11 @@ public class TripService : ITripService
     }
 
     /// <summary>
-    /// Retrieve all Trips
+    /// Retrieve all Trips belonging to the given user
     /// </summary>
-    public async Task<List<Trip>> GetAllTripsAsync()
+    public async Task<List<Trip>> GetAllTripsAsync(Guid userId)
     {
-        return await _repository.GetAllAsync();
+        return await _repository.GetAllAsync(userId);
     }
 
     /// <summary>
