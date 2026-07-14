@@ -34,6 +34,10 @@ public class AuthController : ControllerBase
             return BadRequest(ModelState);
         }
 
+        if (string.IsNullOrWhiteSpace(googleLoginDto.IdToken))
+        {
+            return BadRequest(new { message = "IdToken is required." });
+        }
         try
         {
             var result = await _authService.LoginWithGoogleAsync(googleLoginDto.IdToken);
