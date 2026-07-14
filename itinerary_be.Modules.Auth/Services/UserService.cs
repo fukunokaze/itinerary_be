@@ -20,7 +20,7 @@ public class UserService : IUserService
         var existing = await _repository.GetByEmailAsync(email);
         if (existing != null)
         {
-            _logger.LogInformation($"User with email {email} logged in");
+            _logger.LogInformation("User with email {Email} logged in", email);
             return existing;
         }
 
@@ -32,9 +32,22 @@ public class UserService : IUserService
             CreatedAt = DateTime.UtcNow
         };
 
-        await _repository.CreateAsync(user);
-        _logger.LogInformation($"User created with ID: {user.Id} for email {email}");
+        try
+        {
+            await _repository.CreateAsync(user);
+            _logger.LogInformation("User created with ID {UserId} for email {Email}", user.Id, email);
+            return user;
+        }
+        catch (Microsoft.EntityFrameworkCore.DbUpdateException)
+        {
+            // Likely a concurrent create for the same email; return the row that won the race.
+            var created = await _repository.GetByEmailAsync(email);
+            if (created != null)
+            {
+                _logger.LogInformation("User with email {Email} logged in (created concurrently)", email);
+                return created;
+            }
 
-        return user;
+            throw;
+        }
     }
-}
