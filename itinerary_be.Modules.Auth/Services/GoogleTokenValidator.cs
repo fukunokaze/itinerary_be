@@ -29,7 +29,7 @@ public class GoogleTokenValidator : IGoogleTokenValidator
 
             return new GoogleUserInfo(payload.Email, payload.EmailVerified, payload.Name);
         }
-        catch (InvalidJwtException ex)
+        catch (Exception ex) when (ex is InvalidJwtException or ArgumentException)
         {
             throw new InvalidGoogleTokenException("Google ID token failed validation.", ex);
         }
