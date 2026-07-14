@@ -28,9 +28,12 @@ builder.Services.AddAuthServices(builder.Configuration);
 
 var jwtIssuer = builder.Configuration["Jwt:Issuer"];
 var jwtAudience = builder.Configuration["Jwt:Audience"];
-var jwtSecret = builder.Configuration["Jwt:Secret"]
-    ?? throw new InvalidOperationException("Jwt:Secret is not configured. Set it via dotnet user-secrets for local dev.");
+var jwtSecret = builder.Configuration["Jwt:Secret"];
 
+if (string.IsNullOrWhiteSpace(jwtIssuer) || string.IsNullOrWhiteSpace(jwtAudience) || string.IsNullOrWhiteSpace(jwtSecret))
+{
+    throw new InvalidOperationException("JWT settings are not configured. Set Jwt:Secret, Jwt:Issuer, and Jwt:Audience via configuration (user-secrets locally).");
+}
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
