@@ -28,9 +28,7 @@ public class AuthService : IAuthService
     {
         var googleUser = await _googleTokenValidator.ValidateAsync(idToken);
 
-        if (!googleUser.EmailVerified)
-        {
-            _logger.LogWarning($"Google login rejected: email {googleUser.Email} not verified");
+            _logger.LogWarning("Google login rejected: email {Email} not verified", googleUser.Email);
             throw new InvalidGoogleTokenException("Google email is not verified.");
         }
 
