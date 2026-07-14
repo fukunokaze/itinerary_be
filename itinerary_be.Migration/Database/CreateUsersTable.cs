@@ -2,7 +2,7 @@ using FluentMigrator;
 
 namespace itinerary_be.Migration.Database;
 
-[Migration(20260713120000, "Create Users Table")]
+[Migration(20260713120001, "Create Users Table")]
 public class CreateUsersTable : FluentMigrator.Migration
 {
     public override void Up()
