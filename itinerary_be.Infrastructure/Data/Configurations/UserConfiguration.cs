@@ -23,6 +23,6 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
                .HasMaxLength(200);
 
         builder.Property(u => u.CreatedAt)
-               .HasDefaultValueSql("now()");
+               .HasDefaultValueSql("timezone('utc', now())");
     }
 }
