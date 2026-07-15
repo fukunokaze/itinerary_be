@@ -24,6 +24,7 @@ builder.Services.AddDbContext<ItineraryDbContext>(options =>
 builder.Services.AddTripServices();
 
 // Add Auth services
+builder.Services.AddDataProtection();
 builder.Services.AddAuthServices(builder.Configuration);
 
 var jwtIssuer = builder.Configuration["Jwt:Issuer"];

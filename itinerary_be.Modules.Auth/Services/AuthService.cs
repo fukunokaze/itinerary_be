@@ -11,6 +11,7 @@ public class AuthService : IAuthService
     private readonly IGoogleTokenValidator _googleTokenValidator;
     private readonly IUserService _userService;
     private readonly IJwtTokenService _jwtTokenService;
+    private readonly IUserGoogleTokenService _userGoogleTokenService;
     private readonly ILogger<AuthService> _logger;
 
     public AuthService(
@@ -18,12 +19,14 @@ public class AuthService : IAuthService
         IGoogleTokenValidator googleTokenValidator,
         IUserService userService,
         IJwtTokenService jwtTokenService,
+        IUserGoogleTokenService userGoogleTokenService,
         ILogger<AuthService> logger)
     {
         _googleOAuthClient = googleOAuthClient;
         _googleTokenValidator = googleTokenValidator;
         _userService = userService;
         _jwtTokenService = jwtTokenService;
+        _userGoogleTokenService = userGoogleTokenService;
         _logger = logger;
     }
 
@@ -42,8 +45,15 @@ public class AuthService : IAuthService
         var (token, expiresAt) = _jwtTokenService.GenerateToken(user);
         _logger.LogInformation("Issued JWT for user {UserId}", user.Id);
 
-        // tokenResponse.AccessToken / RefreshToken are intentionally discarded here —
-        // persistence and encryption of Google tokens is tracked separately (KAN-11).
+        try
+        {
+            await _userGoogleTokenService.SaveTokensAsync(user.Id, tokenResponse);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to save Google tokens for user {UserId}", user.Id);
+        }
+
         return new AuthResult(user, token, expiresAt);
     }
 }

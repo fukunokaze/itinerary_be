@@ -29,6 +29,8 @@ public static class AuthServiceRegistration
         services.AddHttpClient<IGoogleOAuthClient, GoogleOAuthClient>();
         services.AddScoped<IGoogleTokenValidator, GoogleTokenValidator>();
         services.AddScoped<IJwtTokenService, JwtTokenService>();
+        services.AddScoped<IUserGoogleTokenRepository, UserGoogleTokenRepository>();
+        services.AddScoped<IUserGoogleTokenService, UserGoogleTokenService>();
         services.AddScoped<IAuthService, AuthService>();
 
         return services;

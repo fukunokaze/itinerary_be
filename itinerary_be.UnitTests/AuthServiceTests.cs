@@ -17,6 +17,7 @@ public class AuthServiceTests
     private readonly Mock<IGoogleTokenValidator> _mockGoogleTokenValidator;
     private readonly Mock<IUserService> _mockUserService;
     private readonly Mock<IJwtTokenService> _mockJwtTokenService;
+    private readonly Mock<IUserGoogleTokenService> _mockUserGoogleTokenService;
     private readonly Mock<ILogger<AuthService>> _mockLogger;
     private readonly AuthService _authService;
 
@@ -26,12 +27,14 @@ public class AuthServiceTests
         _mockGoogleTokenValidator = new Mock<IGoogleTokenValidator>();
         _mockUserService = new Mock<IUserService>();
         _mockJwtTokenService = new Mock<IJwtTokenService>();
+        _mockUserGoogleTokenService = new Mock<IUserGoogleTokenService>();
         _mockLogger = new Mock<ILogger<AuthService>>();
         _authService = new AuthService(
             _mockGoogleOAuthClient.Object,
             _mockGoogleTokenValidator.Object,
             _mockUserService.Object,
             _mockJwtTokenService.Object,
+            _mockUserGoogleTokenService.Object,
             _mockLogger.Object);
     }
 
@@ -63,6 +66,33 @@ public class AuthServiceTests
 
         _mockUserService.Verify(s => s.GetOrCreateUserAsync(googleUser.Email, googleUser.Name), Times.Once);
         _mockJwtTokenService.Verify(j => j.GenerateToken(user), Times.Once);
+        _mockUserGoogleTokenService.Verify(t => t.SaveTokensAsync(user.Id, tokenResponse), Times.Once);
+    }
+
+    [Fact]
+    public async Task LoginWithGoogleAsync_TokenSaveThrows_StillReturnsJwtResult()
+    {
+        // Arrange
+        var code = "valid-code";
+        var idToken = "id-token-from-exchange";
+        var tokenResponse = new GoogleTokenResponse(idToken, "access-token", "refresh-token", 3600, "openid email profile");
+        var googleUser = new GoogleUserInfo("new@example.com", true, "New User");
+        var user = new User { Id = Guid.NewGuid(), Email = googleUser.Email, Name = googleUser.Name, CreatedAt = DateTime.UtcNow };
+        var expiresAt = DateTime.UtcNow.AddHours(1);
+
+        _mockGoogleOAuthClient.Setup(c => c.ExchangeCodeAsync(code)).ReturnsAsync(tokenResponse);
+        _mockGoogleTokenValidator.Setup(v => v.ValidateAsync(idToken)).ReturnsAsync(googleUser);
+        _mockUserService.Setup(s => s.GetOrCreateUserAsync(googleUser.Email, googleUser.Name)).ReturnsAsync(user);
+        _mockJwtTokenService.Setup(j => j.GenerateToken(user)).Returns(("jwt-token", expiresAt));
+        _mockUserGoogleTokenService.Setup(t => t.SaveTokensAsync(user.Id, tokenResponse))
+            .ThrowsAsync(new InvalidOperationException("Database error"));
+
+        // Act
+        var result = await _authService.LoginWithGoogleAsync(code);
+
+        // Assert
+        Assert.Equal(user, result.User);
+        Assert.Equal("jwt-token", result.AccessToken);
     }
 
     [Fact]
