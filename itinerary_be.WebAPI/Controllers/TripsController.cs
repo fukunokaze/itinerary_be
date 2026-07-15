@@ -55,7 +55,13 @@ public class TripsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<TripResponseDto>> GetTripById(Guid id)
     {
-        var trip = await _tripService.GetTripByIdAsync(id);
+        var currentUser = await GetCurrentUserAsync();
+        if (currentUser == null)
+        {
+            return Unauthorized();
+        }
+
+        var trip = await _tripService.GetTripByIdAndUserIdAsync(id, currentUser.Id);
 
         if (trip == null)
         {

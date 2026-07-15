@@ -61,6 +61,19 @@ public class TripService : ITripService
         return trip;
     }
 
+    public async Task<Trip?> GetTripByIdAndUserIdAsync(Guid id, Guid userId)
+    {
+        var trip = await _repository.GetByIdAndUserIdAsync(id, userId);
+
+        if (trip == null)
+        {
+            _logger.LogWarning($"Trip with ID {id} not found for User {userId}");
+            return null;
+        }
+
+        return trip;
+    }
+
     /// <summary>
     /// Retrieve all Trips belonging to the given user
     /// </summary>

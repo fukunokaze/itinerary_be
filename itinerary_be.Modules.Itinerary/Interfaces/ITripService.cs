@@ -33,4 +33,5 @@ public interface ITripService
     Task<bool> DeleteTripAsync(Guid id);
     Task<Trip?> UpdateTripAsync(Guid id, string title, DateOnly startDate, DateOnly endDate, Guid userId, string destination = "", string? description = "");
     Task<bool> DeleteTripAsync(Guid id, Guid userId);
+    Task<Trip?> GetTripByIdAndUserIdAsync(Guid id, Guid userId);
 }
