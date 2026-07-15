@@ -1,5 +1,6 @@
 namespace itinerary_be.Modules.Auth.Services;
 
+using System.Net;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.Logging;
@@ -63,6 +64,58 @@ public class GoogleOAuthClient : IGoogleOAuthClient
         }
     }
 
+    public async Task<GoogleRefreshTokenResponse> RefreshAccessTokenAsync(string refreshToken)
+    {
+        try
+        {
+            var form = new Dictionary<string, string>
+            {
+                ["refresh_token"] = refreshToken,
+                ["client_id"] = _options.ClientId,
+                ["client_secret"] = _options.ClientSecret,
+                ["grant_type"] = "refresh_token"
+            };
+
+            using var response = await _httpClient.PostAsync(TokenEndpoint, new FormUrlEncodedContent(form));
+            var body = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                if (response.StatusCode == HttpStatusCode.Unauthorized || IsInvalidGrantError(body))
+                {
+                    _logger.LogWarning("Google refresh token is invalid or revoked: {Body}", body);
+                    throw new GoogleReauthorizationRequiredException("Google refresh token is invalid or has been revoked.");
+                }
+
+                _logger.LogWarning("Google token refresh failed with status {StatusCode}: {Body}", response.StatusCode, body);
+                throw new InvalidGoogleTokenException($"Google token refresh failed with status {(int)response.StatusCode}.");
+            }
+
+            var payload = JsonSerializer.Deserialize<GoogleTokenRefreshPayload>(body)
+                ?? throw new InvalidGoogleTokenException("Google token refresh returned an empty response.");
+
+            return new GoogleRefreshTokenResponse(payload.AccessToken, payload.ExpiresIn, payload.Scope);
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or JsonException)
+        {
+            _logger.LogWarning(ex, "Google token refresh request failed.");
+            throw new InvalidGoogleTokenException("Google token refresh failed.", ex);
+        }
+    }
+
+    private static bool IsInvalidGrantError(string body)
+    {
+        try
+        {
+            var error = JsonSerializer.Deserialize<GoogleTokenErrorPayload>(body);
+            return error?.Error == "invalid_grant";
+        }
+        catch (JsonException)
+        {
+            return false;
+        }
+    }
+
     private class GoogleTokenExchangePayload
     {
         [JsonPropertyName("id_token")]
@@ -79,5 +132,23 @@ public class GoogleOAuthClient : IGoogleOAuthClient
 
         [JsonPropertyName("scope")]
         public string Scope { get; set; } = string.Empty;
+    }
+
+    private class GoogleTokenRefreshPayload
+    {
+        [JsonPropertyName("access_token")]
+        public string AccessToken { get; set; } = string.Empty;
+
+        [JsonPropertyName("expires_in")]
+        public int ExpiresIn { get; set; }
+
+        [JsonPropertyName("scope")]
+        public string Scope { get; set; } = string.Empty;
+    }
+
+    private class GoogleTokenErrorPayload
+    {
+        [JsonPropertyName("error")]
+        public string? Error { get; set; }
     }
 }
