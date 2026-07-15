@@ -14,6 +14,8 @@ public static class AuthServiceRegistration
         services.AddOptions<GoogleAuthOptions>()
             .Bind(configuration.GetSection("Google"))
             .Validate(o => !string.IsNullOrWhiteSpace(o.ClientId), "Google:ClientId is required.")
+            .Validate(o => !string.IsNullOrWhiteSpace(o.ClientSecret), "Google:ClientSecret is required.")
+            .Validate(o => !string.IsNullOrWhiteSpace(o.RedirectUri), "Google:RedirectUri is required.")
             .ValidateOnStart();
 
         services.AddOptions<JwtOptions>()
@@ -24,8 +26,11 @@ public static class AuthServiceRegistration
             .ValidateOnStart();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUserService, UserService>();
+        services.AddHttpClient<IGoogleOAuthClient, GoogleOAuthClient>();
         services.AddScoped<IGoogleTokenValidator, GoogleTokenValidator>();
         services.AddScoped<IJwtTokenService, JwtTokenService>();
+        services.AddScoped<IUserGoogleTokenRepository, UserGoogleTokenRepository>();
+        services.AddScoped<IUserGoogleTokenService, UserGoogleTokenService>();
         services.AddScoped<IAuthService, AuthService>();
 
         return services;

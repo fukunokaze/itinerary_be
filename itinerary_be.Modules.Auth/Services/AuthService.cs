@@ -7,26 +7,33 @@ using itinerary_be.Modules.Auth.Models;
 
 public class AuthService : IAuthService
 {
+    private readonly IGoogleOAuthClient _googleOAuthClient;
     private readonly IGoogleTokenValidator _googleTokenValidator;
     private readonly IUserService _userService;
     private readonly IJwtTokenService _jwtTokenService;
+    private readonly IUserGoogleTokenService _userGoogleTokenService;
     private readonly ILogger<AuthService> _logger;
 
     public AuthService(
+        IGoogleOAuthClient googleOAuthClient,
         IGoogleTokenValidator googleTokenValidator,
         IUserService userService,
         IJwtTokenService jwtTokenService,
+        IUserGoogleTokenService userGoogleTokenService,
         ILogger<AuthService> logger)
     {
+        _googleOAuthClient = googleOAuthClient;
         _googleTokenValidator = googleTokenValidator;
         _userService = userService;
         _jwtTokenService = jwtTokenService;
+        _userGoogleTokenService = userGoogleTokenService;
         _logger = logger;
     }
 
-    public async Task<AuthResult> LoginWithGoogleAsync(string idToken)
+    public async Task<AuthResult> LoginWithGoogleAsync(string code)
     {
-        var googleUser = await _googleTokenValidator.ValidateAsync(idToken);
+        var tokenResponse = await _googleOAuthClient.ExchangeCodeAsync(code);
+        var googleUser = await _googleTokenValidator.ValidateAsync(tokenResponse.IdToken);
 
         if (!googleUser.EmailVerified)
         {
@@ -37,6 +44,16 @@ public class AuthService : IAuthService
         var user = await _userService.GetOrCreateUserAsync(googleUser.Email, googleUser.Name);
         var (token, expiresAt) = _jwtTokenService.GenerateToken(user);
         _logger.LogInformation("Issued JWT for user {UserId}", user.Id);
+
+        try
+        {
+            await _userGoogleTokenService.SaveTokensAsync(user.Id, tokenResponse);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to save Google tokens for user {UserId}", user.Id);
+        }
+
         return new AuthResult(user, token, expiresAt);
     }
 }

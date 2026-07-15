@@ -6,6 +6,6 @@ public class GoogleLoginDtoValidator : AbstractValidator<GoogleLoginDto>
 {
     public GoogleLoginDtoValidator()
     {
-        RuleFor(x => x.IdToken).NotEmpty().WithMessage("IdToken is required.");
+        RuleFor(x => x.Code).NotEmpty().WithMessage("Code is required.");
     }
 }

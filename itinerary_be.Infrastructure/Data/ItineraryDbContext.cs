@@ -14,6 +14,7 @@ public class ItineraryDbContext(DbContextOptions<ItineraryDbContext> options) : 
     public DbSet<Lodging> Lodgings => Set<Lodging>();
     public DbSet<TripEvent> TripEvents => Set<TripEvent>();
     public DbSet<User> Users => Set<User>();
+    public DbSet<UserGoogleToken> UserGoogleTokens => Set<UserGoogleToken>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
