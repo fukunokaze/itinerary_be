@@ -42,7 +42,7 @@ public class TripsController : ControllerBase
             return Unauthorized();
         }
 
-        var trip = await _tripService.CreateTripAsync(currentUser.Id, createTripDto.Title, createTripDto.StartDate, createTripDto.EndDate);
+        var trip = await _tripService.CreateTripAsync(currentUser.Id, createTripDto.Title, createTripDto.StartDate, createTripDto.EndDate, createTripDto.Destination, createTripDto.Description);
         var tripResponseDto = MapToResponseDto(trip);
         return CreatedAtAction(nameof(GetTripById), new { id = trip.Id }, tripResponseDto);
     }
@@ -109,7 +109,7 @@ public class TripsController : ControllerBase
             return Unauthorized();
         }
 
-        var trip = await _tripService.UpdateTripAsync(id, updateTripDto.Title, updateTripDto.StartDate, updateTripDto.EndDate, currentUser.Id);
+        var trip = await _tripService.UpdateTripAsync(id, updateTripDto.Title, updateTripDto.StartDate, updateTripDto.EndDate, currentUser.Id, updateTripDto.Destination, updateTripDto.Description);
 
         if (trip == null)
         {
@@ -162,6 +162,8 @@ public class TripsController : ControllerBase
             Title = trip.Title,
             StartDate = trip.StartDate,
             EndDate = trip.EndDate,
+            Destination = trip.Destination,
+            Description = trip.Description,
             Events = trip.TripEvents != null ? trip.TripEvents.Select(e => new TripEventResponseDto
             {
                 Id = e.Id,
