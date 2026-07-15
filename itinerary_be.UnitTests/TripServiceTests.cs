@@ -171,6 +171,83 @@ public class TripServiceTests
 
     #endregion
 
+    #region GetTripByIdAndUserIdAsync Tests
+
+    [Fact]
+    public async Task GetTripByIdAndUserIdAsync_WithValidIdAndUserId_ReturnsTripSuccessfully()
+    {
+        // Arrange
+        var tripId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+        var trip = new Trip
+        {
+            Id = tripId,
+            UserId = userId,
+            Title = "Test Trip",
+            StartDate = new DateOnly(2026, 07, 01),
+            EndDate = new DateOnly(2026, 07, 10),
+            Destination = "Paris",
+            Description = "A trip to Paris"
+        };
+
+        _mockRepository.Setup(r => r.GetByIdAndUserIdAsync(tripId, userId))
+            .ReturnsAsync(trip);
+
+        // Act
+        var result = await _tripService.GetTripByIdAndUserIdAsync(tripId, userId);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(trip.Id, result.Id);
+        Assert.Equal(trip.UserId, result.UserId);
+        Assert.Equal(trip.Title, result.Title);
+
+        _mockRepository.Verify(r => r.GetByIdAndUserIdAsync(tripId, userId), Times.Once);
+    }
+
+    [Fact]
+    public async Task GetTripByIdAndUserIdAsync_WithNonExistentIdOrUserId_ReturnsNullAndLogsWarning()
+    {
+        // Arrange
+        var tripId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+
+        _mockRepository.Setup(r => r.GetByIdAndUserIdAsync(tripId, userId))
+            .ReturnsAsync((Trip?)null);
+
+        // Act
+        var result = await _tripService.GetTripByIdAndUserIdAsync(tripId, userId);
+
+        // Assert
+        Assert.Null(result);
+
+        _mockRepository.Verify(r => r.GetByIdAndUserIdAsync(tripId, userId), Times.Once);
+        _mockLogger.Verify(l => l.Log(
+            LogLevel.Warning,
+            It.IsAny<EventId>(),
+            It.IsAny<It.IsAnyType>(),
+            It.IsAny<Exception>(),
+            It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task GetTripByIdAndUserIdAsync_RepositoryThrowsException_ExceptionPropagates()
+    {
+        // Arrange
+        var tripId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+
+        _mockRepository.Setup(r => r.GetByIdAndUserIdAsync(tripId, userId))
+            .ThrowsAsync(new InvalidOperationException("Database error"));
+
+        // Act & Assert
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            _tripService.GetTripByIdAndUserIdAsync(tripId, userId));
+    }
+
+    #endregion
+
     #region GetAllTripsAsync Tests
 
     [Fact]
@@ -348,6 +425,96 @@ public class TripServiceTests
 
     #endregion
 
+    #region UpdateTripAsync (with userId) Tests
+
+    [Fact]
+    public async Task UpdateTripAsync_WithValidIdAndUserId_UpdatesAndReturnsTripSuccessfully()
+    {
+        // Arrange
+        var tripId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+        var originalTrip = new Trip
+        {
+            Id = tripId,
+            UserId = userId,
+            Title = "Old Title",
+            StartDate = new DateOnly(2026, 07, 01),
+            EndDate = new DateOnly(2026, 07, 10),
+            Destination = "Old Destination",
+            Description = "Old Description"
+        };
+
+        var newTitle = "Updated Title";
+        var newStartDate = new DateOnly(2026, 08, 01);
+        var newEndDate = new DateOnly(2026, 08, 15);
+        var newDestination = "New Destination";
+        var newDescription = "New Description";
+
+        _mockRepository.Setup(r => r.GetByIdAndUserIdAsync(tripId, userId))
+            .ReturnsAsync(originalTrip);
+        _mockRepository.Setup(r => r.GetByIdAsync(tripId))
+            .ReturnsAsync(originalTrip);
+
+        // Act
+        var result = await _tripService.UpdateTripAsync(tripId, newTitle, newStartDate, newEndDate, userId, newDestination, newDescription);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(tripId, result.Id);
+        Assert.Equal(newTitle, result.Title);
+        Assert.Equal(newStartDate, result.StartDate);
+        Assert.Equal(newEndDate, result.EndDate);
+        Assert.Equal(newDestination, result.Destination);
+        Assert.Equal(newDescription, result.Description);
+
+        _mockRepository.Verify(r => r.GetByIdAndUserIdAsync(tripId, userId), Times.Once);
+        _mockRepository.Verify(r => r.UpdateAsync(It.IsAny<Trip>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task UpdateTripAsync_WithNonExistentIdForUser_ReturnsNullAndLogsWarning()
+    {
+        // Arrange
+        var tripId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+
+        _mockRepository.Setup(r => r.GetByIdAndUserIdAsync(tripId, userId))
+            .ReturnsAsync((Trip?)null);
+
+        // Act
+        var result = await _tripService.UpdateTripAsync(tripId, "Title", new DateOnly(2026, 07, 01), new DateOnly(2026, 07, 10), userId);
+
+        // Assert
+        Assert.Null(result);
+
+        _mockRepository.Verify(r => r.GetByIdAndUserIdAsync(tripId, userId), Times.Once);
+        _mockRepository.Verify(r => r.UpdateAsync(It.IsAny<Trip>()), Times.Never);
+        _mockLogger.Verify(l => l.Log(
+            LogLevel.Warning,
+            It.IsAny<EventId>(),
+            It.IsAny<It.IsAnyType>(),
+            It.IsAny<Exception>(),
+            It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task UpdateTripAsync_WithUserId_RepositoryThrowsException_ExceptionPropagates()
+    {
+        // Arrange
+        var tripId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+
+        _mockRepository.Setup(r => r.GetByIdAndUserIdAsync(tripId, userId))
+            .ThrowsAsync(new InvalidOperationException("Database error"));
+
+        // Act & Assert
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            _tripService.UpdateTripAsync(tripId, "Title", new DateOnly(2026, 07, 01), new DateOnly(2026, 07, 10), userId));
+    }
+
+    #endregion
+
     #region DeleteTripAsync Tests
 
     [Fact]
@@ -419,8 +586,89 @@ public class TripServiceTests
             .ThrowsAsync(new InvalidOperationException("Database error"));
 
         // Act & Assert
-        await Assert.ThrowsAsync<InvalidOperationException>(() => 
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
             _tripService.DeleteTripAsync(tripId));
+    }
+
+    #endregion
+
+    #region DeleteTripAsync (with userId) Tests
+
+    [Fact]
+    public async Task DeleteTripAsync_WithValidIdAndUserId_DeletesAndReturnsTrueSuccessfully()
+    {
+        // Arrange
+        var tripId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+        var trip = new Trip
+        {
+            Id = tripId,
+            UserId = userId,
+            Title = "Trip to Delete",
+            StartDate = new DateOnly(2026, 07, 01),
+            EndDate = new DateOnly(2026, 07, 10)
+        };
+
+        _mockRepository.Setup(r => r.GetByIdAndUserIdAsync(tripId, userId))
+            .ReturnsAsync(trip);
+
+        // Act
+        var result = await _tripService.DeleteTripAsync(tripId, userId);
+
+        // Assert
+        Assert.True(result);
+
+        _mockRepository.Verify(r => r.GetByIdAndUserIdAsync(tripId, userId), Times.Once);
+        _mockRepository.Verify(r => r.DeleteAsync(trip), Times.Once);
+        _mockLogger.Verify(l => l.Log(
+            LogLevel.Information,
+            It.IsAny<EventId>(),
+            It.IsAny<It.IsAnyType>(),
+            It.IsAny<Exception>(),
+            It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task DeleteTripAsync_WithNonExistentIdForUser_ReturnsFalseAndLogsWarning()
+    {
+        // Arrange
+        var tripId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+
+        _mockRepository.Setup(r => r.GetByIdAndUserIdAsync(tripId, userId))
+            .ReturnsAsync((Trip?)null);
+
+        // Act
+        var result = await _tripService.DeleteTripAsync(tripId, userId);
+
+        // Assert
+        Assert.False(result);
+
+        _mockRepository.Verify(r => r.GetByIdAndUserIdAsync(tripId, userId), Times.Once);
+        _mockRepository.Verify(r => r.DeleteAsync(It.IsAny<Trip>()), Times.Never);
+        _mockLogger.Verify(l => l.Log(
+            LogLevel.Warning,
+            It.IsAny<EventId>(),
+            It.IsAny<It.IsAnyType>(),
+            It.IsAny<Exception>(),
+            It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task DeleteTripAsync_WithUserId_RepositoryThrowsException_ExceptionPropagates()
+    {
+        // Arrange
+        var tripId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+
+        _mockRepository.Setup(r => r.GetByIdAndUserIdAsync(tripId, userId))
+            .ThrowsAsync(new InvalidOperationException("Database error"));
+
+        // Act & Assert
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            _tripService.DeleteTripAsync(tripId, userId));
     }
 
     #endregion
