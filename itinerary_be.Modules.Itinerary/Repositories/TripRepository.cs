@@ -42,12 +42,30 @@ public class TripRepository : ITripRepository
             .FirstOrDefaultAsync(t => t.Id == id);
     }
 
-    /// <summary>
-    /// Retrieve all Trips from the database
-    /// </summary>
-    public async Task<List<Trip>> GetAllAsync()
+    public async Task<Trip?> GetByIdAndUserIdAsync(Guid id, Guid userId)
     {
-        return await _context.Trips.ToListAsync();
+        return await _context.Trips
+            .Include(t => t.TripEvents)
+            .Include(t => t.Lodgings)
+            .Include(t => t.Flights)
+            .FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId);
+    }
+
+    public async Task<List<Trip>> GetTripByUserIdAsync(Guid userId)
+    {
+        return await _context.Trips
+            .Where(t => t.UserId == userId)
+            .ToListAsync();
+    }
+
+    /// <summary>
+    /// Retrieve all Trips belonging to a given user from the database
+    /// </summary>
+    public async Task<List<Trip>> GetAllAsync(Guid userId)
+    {
+        return await _context.Trips
+            .Where(t => t.UserId == userId)
+            .ToListAsync();
     }
 
     /// <summary>

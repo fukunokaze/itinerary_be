@@ -1,8 +1,10 @@
 namespace itinerary_be.WebAPI.Controllers;
 
+using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using itinerary_be.WebAPI.DTOs;
 using itinerary_be.Modules.Itinerary.Interfaces;
+using itinerary_be.Modules.Auth.Interfaces;
 using itinerary_be.Core.Domain.Enums;
 
 [ApiController]
@@ -10,11 +12,13 @@ using itinerary_be.Core.Domain.Enums;
 public class TripsController : ControllerBase
 {
     private readonly ITripService _tripService;
+    private readonly IUserRepository _userRepository;
     private readonly ILogger<TripsController> _logger;
 
-    public TripsController(ITripService tripService, ILogger<TripsController> logger)
+    public TripsController(ITripService tripService, IUserRepository userRepository, ILogger<TripsController> logger)
     {
         _tripService = tripService;
+        _userRepository = userRepository;
         _logger = logger;
     }
 
@@ -24,6 +28,7 @@ public class TripsController : ControllerBase
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<TripResponseDto>> CreateTrip(CreateTripDto createTripDto)
     {
         if (!ModelState.IsValid)
@@ -31,7 +36,13 @@ public class TripsController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        var trip = await _tripService.CreateTripAsync(createTripDto.Title, createTripDto.StartDate, createTripDto.EndDate);
+        var currentUser = await GetCurrentUserAsync();
+        if (currentUser == null)
+        {
+            return Unauthorized();
+        }
+
+        var trip = await _tripService.CreateTripAsync(currentUser.Id, createTripDto.Title, createTripDto.StartDate, createTripDto.EndDate);
         var tripResponseDto = MapToResponseDto(trip);
         return CreatedAtAction(nameof(GetTripById), new { id = trip.Id }, tripResponseDto);
     }
@@ -44,7 +55,13 @@ public class TripsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<TripResponseDto>> GetTripById(Guid id)
     {
-        var trip = await _tripService.GetTripByIdAsync(id);
+        var currentUser = await GetCurrentUserAsync();
+        if (currentUser == null)
+        {
+            return Unauthorized();
+        }
+
+        var trip = await _tripService.GetTripByIdAndUserIdAsync(id, currentUser.Id);
 
         if (trip == null)
         {
@@ -55,13 +72,20 @@ public class TripsController : ControllerBase
     }
 
     /// <summary>
-    /// Get all Trips
+    /// Get all Trips belonging to the authenticated user
     /// </summary>
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<IEnumerable<TripResponseDto>>> GetAllTrips()
     {
-        var trips = await _tripService.GetAllTripsAsync();
+        var currentUser = await GetCurrentUserAsync();
+        if (currentUser == null)
+        {
+            return Unauthorized();
+        }
+
+        var trips = await _tripService.GetAllTripsAsync(currentUser.Id);
         var tripDtos = trips.Select(MapToResponseDto).ToList();
         return Ok(tripDtos);
     }
@@ -79,8 +103,13 @@ public class TripsController : ControllerBase
         {
             return BadRequest(ModelState);
         }
+        var currentUser = await GetCurrentUserAsync();
+        if (currentUser == null)
+        {
+            return Unauthorized();
+        }
 
-        var trip = await _tripService.UpdateTripAsync(id, updateTripDto.Title, updateTripDto.StartDate, updateTripDto.EndDate);
+        var trip = await _tripService.UpdateTripAsync(id, updateTripDto.Title, updateTripDto.StartDate, updateTripDto.EndDate, currentUser.Id);
 
         if (trip == null)
         {
@@ -98,7 +127,13 @@ public class TripsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteTrip(Guid id)
     {
-        var success = await _tripService.DeleteTripAsync(id);
+        var currentUser = await GetCurrentUserAsync();
+        if (currentUser == null)
+        {
+            return Unauthorized();
+        }
+
+        var success = await _tripService.DeleteTripAsync(id, currentUser.Id);
 
         if (!success)
         {
@@ -106,6 +141,17 @@ public class TripsController : ControllerBase
         }
 
         return NoContent();
+    }
+
+    private async Task<itinerary_be.Core.Domain.Entities.User?> GetCurrentUserAsync()
+    {
+        var email = User.FindFirstValue(ClaimTypes.Email);
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            return null;
+        }
+
+        return await _userRepository.GetByEmailAsync(email);
     }
 
     private static TripResponseDto MapToResponseDto(itinerary_be.Core.Domain.Entities.Trip trip)

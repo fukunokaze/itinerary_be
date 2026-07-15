@@ -28,11 +28,14 @@ public class AuthService : IAuthService
     {
         var googleUser = await _googleTokenValidator.ValidateAsync(idToken);
 
+        if (!googleUser.EmailVerified)
+        {
             _logger.LogWarning("Google login rejected: email {Email} not verified", googleUser.Email);
             throw new InvalidGoogleTokenException("Google email is not verified.");
         }
 
         var user = await _userService.GetOrCreateUserAsync(googleUser.Email, googleUser.Name);
+        var (token, expiresAt) = _jwtTokenService.GenerateToken(user);
         _logger.LogInformation("Issued JWT for user {UserId}", user.Id);
         return new AuthResult(user, token, expiresAt);
     }

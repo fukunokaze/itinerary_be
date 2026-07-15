@@ -18,6 +18,11 @@ public class TripConfiguration : IEntityTypeConfiguration<Trip>
                .HasMaxLength(200);
 
         // Relationships
+        builder.HasOne(t => t.User)
+               .WithMany(u => u.Trips)
+               .HasForeignKey(t => t.UserId)
+               .OnDelete(DeleteBehavior.Cascade);
+
         // builder.HasMany(t => t.ItineraryDays)
         //        .WithOne(d => d.Trip)
         //        .HasForeignKey(d => d.TripId)

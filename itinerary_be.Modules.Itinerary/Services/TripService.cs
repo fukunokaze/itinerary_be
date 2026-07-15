@@ -24,13 +24,14 @@ public class TripService : ITripService
     }
 
     /// <summary>
-    /// Create a new Trip
+    /// Create a new Trip owned by the given user
     /// </summary>
-    public async Task<Trip> CreateTripAsync(string title, DateOnly startDate, DateOnly endDate, string destination = "", string? description = "")
+    public async Task<Trip> CreateTripAsync(Guid userId, string title, DateOnly startDate, DateOnly endDate, string destination = "", string? description = "")
     {
         var trip = new Trip
         {
             Id = Guid.NewGuid(),
+            UserId = userId,
             Title = title,
             Destination = destination,
             Description = description,
@@ -60,12 +61,25 @@ public class TripService : ITripService
         return trip;
     }
 
-    /// <summary>
-    /// Retrieve all Trips
-    /// </summary>
-    public async Task<List<Trip>> GetAllTripsAsync()
+    public async Task<Trip?> GetTripByIdAndUserIdAsync(Guid id, Guid userId)
     {
-        return await _repository.GetAllAsync();
+        var trip = await _repository.GetByIdAndUserIdAsync(id, userId);
+
+        if (trip == null)
+        {
+            _logger.LogWarning($"Trip with ID {id} not found for User {userId}");
+            return null;
+        }
+
+        return trip;
+    }
+
+    /// <summary>
+    /// Retrieve all Trips belonging to the given user
+    /// </summary>
+    public async Task<List<Trip>> GetAllTripsAsync(Guid userId)
+    {
+        return await _repository.GetAllAsync(userId);
     }
 
     /// <summary>
@@ -93,6 +107,19 @@ public class TripService : ITripService
         return trip;
     }
 
+    public async Task<Trip?> UpdateTripAsync(Guid id, string title, DateOnly startDate, DateOnly endDate, Guid userId, string destination = "", string? description = "")
+    {
+        var trip = await _repository.GetByIdAndUserIdAsync(id, userId);
+
+        if (trip == null)
+        {
+            _logger.LogWarning($"Trip with ID {id} not found in User {userId} for update");
+            return null;
+        }
+
+        return await UpdateTripAsync(id, title, startDate, endDate, destination, description);
+    }
+
     /// <summary>
     /// Delete a Trip
     /// </summary>
@@ -108,6 +135,22 @@ public class TripService : ITripService
 
         await _repository.DeleteAsync(trip);
         _logger.LogInformation($"Trip with ID {id} deleted");
+
+        return true;
+    }
+
+    public async Task<bool> DeleteTripAsync(Guid id, Guid userId)
+    {
+        var trip = await _repository.GetByIdAndUserIdAsync(id, userId);
+
+        if (trip == null)
+        {
+            _logger.LogWarning($"Trip with ID {id} not found in User {userId} for deletion");
+            return false;
+        }
+
+        await _repository.DeleteAsync(trip);
+        _logger.LogInformation($"Trip with ID {id} deleted for User {userId}");
 
         return true;
     }
