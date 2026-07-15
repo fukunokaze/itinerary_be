@@ -31,4 +31,6 @@ public interface ITripRepository
     /// Delete a Trip from the database
     /// </summary>
     Task DeleteAsync(Trip trip);
+    Task<Trip?> GetByIdAndUserIdAsync(Guid id, Guid userId);
+    Task<List<Trip>> GetTripByUserIdAsync(Guid userId);
 }

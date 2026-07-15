@@ -97,8 +97,13 @@ public class TripsController : ControllerBase
         {
             return BadRequest(ModelState);
         }
+        var currentUser = await GetCurrentUserAsync();
+        if (currentUser == null)
+        {
+            return Unauthorized();
+        }
 
-        var trip = await _tripService.UpdateTripAsync(id, updateTripDto.Title, updateTripDto.StartDate, updateTripDto.EndDate);
+        var trip = await _tripService.UpdateTripAsync(id, updateTripDto.Title, updateTripDto.StartDate, updateTripDto.EndDate, currentUser.Id);
 
         if (trip == null)
         {
@@ -116,7 +121,13 @@ public class TripsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteTrip(Guid id)
     {
-        var success = await _tripService.DeleteTripAsync(id);
+        var currentUser = await GetCurrentUserAsync();
+        if (currentUser == null)
+        {
+            return Unauthorized();
+        }
+
+        var success = await _tripService.DeleteTripAsync(id, currentUser.Id);
 
         if (!success)
         {

@@ -94,6 +94,19 @@ public class TripService : ITripService
         return trip;
     }
 
+    public async Task<Trip?> UpdateTripAsync(Guid id, string title, DateOnly startDate, DateOnly endDate, Guid userId, string destination = "", string? description = "")
+    {
+        var trip = await _repository.GetByIdAndUserIdAsync(id, userId);
+
+        if (trip == null)
+        {
+            _logger.LogWarning($"Trip with ID {id} not found in User {userId} for update");
+            return null;
+        }
+
+        return await UpdateTripAsync(id, title, startDate, endDate, destination, description);
+    }
+
     /// <summary>
     /// Delete a Trip
     /// </summary>
@@ -109,6 +122,22 @@ public class TripService : ITripService
 
         await _repository.DeleteAsync(trip);
         _logger.LogInformation($"Trip with ID {id} deleted");
+
+        return true;
+    }
+
+    public async Task<bool> DeleteTripAsync(Guid id, Guid userId)
+    {
+        var trip = await _repository.GetByIdAndUserIdAsync(id, userId);
+
+        if (trip == null)
+        {
+            _logger.LogWarning($"Trip with ID {id} not found in User {userId} for deletion");
+            return false;
+        }
+
+        await _repository.DeleteAsync(trip);
+        _logger.LogInformation($"Trip with ID {id} deleted for User {userId}");
 
         return true;
     }
