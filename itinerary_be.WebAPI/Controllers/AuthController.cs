@@ -20,7 +20,7 @@ public class AuthController : ControllerBase
     }
 
     /// <summary>
-    /// Logs in with a Google ID token, auto-registering a new user profile on first login.
+    /// Logs in by exchanging a Google OAuth authorization code for tokens, auto-registering a new user profile on first login.
     /// </summary>
     [HttpPost("google")]
     [AllowAnonymous]
@@ -34,13 +34,13 @@ public class AuthController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        if (string.IsNullOrWhiteSpace(googleLoginDto.IdToken))
+        if (string.IsNullOrWhiteSpace(googleLoginDto.Code))
         {
-            return BadRequest(new { message = "IdToken is required." });
+            return BadRequest(new { message = "Code is required." });
         }
         try
         {
-            var result = await _authService.LoginWithGoogleAsync(googleLoginDto.IdToken);
+            var result = await _authService.LoginWithGoogleAsync(googleLoginDto.Code);
 
             return Ok(new AuthResponseDto
             {
@@ -57,7 +57,7 @@ public class AuthController : ControllerBase
         catch (InvalidGoogleTokenException ex)
         {
             _logger.LogWarning(ex, "Google login failed.");
-            return Unauthorized(new { message = "Invalid Google ID token." });
+            return Unauthorized(new { message = "Invalid Google authorization code." });
         }
     }
 }

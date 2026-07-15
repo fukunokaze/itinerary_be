@@ -13,6 +13,7 @@ using itinerary_be.Modules.Auth.Services;
 /// </summary>
 public class AuthServiceTests
 {
+    private readonly Mock<IGoogleOAuthClient> _mockGoogleOAuthClient;
     private readonly Mock<IGoogleTokenValidator> _mockGoogleTokenValidator;
     private readonly Mock<IUserService> _mockUserService;
     private readonly Mock<IJwtTokenService> _mockJwtTokenService;
@@ -21,11 +22,13 @@ public class AuthServiceTests
 
     public AuthServiceTests()
     {
+        _mockGoogleOAuthClient = new Mock<IGoogleOAuthClient>();
         _mockGoogleTokenValidator = new Mock<IGoogleTokenValidator>();
         _mockUserService = new Mock<IUserService>();
         _mockJwtTokenService = new Mock<IJwtTokenService>();
         _mockLogger = new Mock<ILogger<AuthService>>();
         _authService = new AuthService(
+            _mockGoogleOAuthClient.Object,
             _mockGoogleTokenValidator.Object,
             _mockUserService.Object,
             _mockJwtTokenService.Object,
@@ -35,20 +38,23 @@ public class AuthServiceTests
     #region LoginWithGoogleAsync Tests
 
     [Fact]
-    public async Task LoginWithGoogleAsync_ValidTokenNewUser_CreatesUserAndReturnsToken()
+    public async Task LoginWithGoogleAsync_ValidCodeNewUser_CreatesUserAndReturnsToken()
     {
         // Arrange
-        var idToken = "valid-id-token";
+        var code = "valid-code";
+        var idToken = "id-token-from-exchange";
+        var tokenResponse = new GoogleTokenResponse(idToken, "access-token", "refresh-token", 3600, "openid email profile https://www.googleapis.com/auth/calendar.readonly");
         var googleUser = new GoogleUserInfo("new@example.com", true, "New User");
         var user = new User { Id = Guid.NewGuid(), Email = googleUser.Email, Name = googleUser.Name, CreatedAt = DateTime.UtcNow };
         var expiresAt = DateTime.UtcNow.AddHours(1);
 
+        _mockGoogleOAuthClient.Setup(c => c.ExchangeCodeAsync(code)).ReturnsAsync(tokenResponse);
         _mockGoogleTokenValidator.Setup(v => v.ValidateAsync(idToken)).ReturnsAsync(googleUser);
         _mockUserService.Setup(s => s.GetOrCreateUserAsync(googleUser.Email, googleUser.Name)).ReturnsAsync(user);
         _mockJwtTokenService.Setup(j => j.GenerateToken(user)).Returns(("jwt-token", expiresAt));
 
         // Act
-        var result = await _authService.LoginWithGoogleAsync(idToken);
+        var result = await _authService.LoginWithGoogleAsync(code);
 
         // Assert
         Assert.Equal(user, result.User);
@@ -60,19 +66,22 @@ public class AuthServiceTests
     }
 
     [Fact]
-    public async Task LoginWithGoogleAsync_ValidTokenExistingUser_ReturnsTokenWithoutDuplicateCreation()
+    public async Task LoginWithGoogleAsync_ValidCodeExistingUser_ReturnsTokenWithoutDuplicateCreation()
     {
         // Arrange
-        var idToken = "valid-id-token";
+        var code = "valid-code";
+        var idToken = "id-token-from-exchange";
+        var tokenResponse = new GoogleTokenResponse(idToken, "access-token", "refresh-token", 3600, "openid email profile https://www.googleapis.com/auth/calendar.readonly");
         var googleUser = new GoogleUserInfo("existing@example.com", true, "Existing User");
         var user = new User { Id = Guid.NewGuid(), Email = googleUser.Email, Name = googleUser.Name, CreatedAt = DateTime.UtcNow };
 
+        _mockGoogleOAuthClient.Setup(c => c.ExchangeCodeAsync(code)).ReturnsAsync(tokenResponse);
         _mockGoogleTokenValidator.Setup(v => v.ValidateAsync(idToken)).ReturnsAsync(googleUser);
         _mockUserService.Setup(s => s.GetOrCreateUserAsync(googleUser.Email, googleUser.Name)).ReturnsAsync(user);
         _mockJwtTokenService.Setup(j => j.GenerateToken(user)).Returns(("jwt-token", DateTime.UtcNow.AddHours(1)));
 
         // Act
-        var result = await _authService.LoginWithGoogleAsync(idToken);
+        var result = await _authService.LoginWithGoogleAsync(code);
 
         // Assert
         Assert.Equal(user.Id, result.User.Id);
@@ -83,14 +92,17 @@ public class AuthServiceTests
     public async Task LoginWithGoogleAsync_EmailNotVerified_ThrowsInvalidGoogleTokenExceptionAndDoesNotIssueToken()
     {
         // Arrange
-        var idToken = "unverified-token";
+        var code = "valid-code";
+        var idToken = "id-token-from-exchange";
+        var tokenResponse = new GoogleTokenResponse(idToken, "access-token", "refresh-token", 3600, "openid email profile");
         var googleUser = new GoogleUserInfo("unverified@example.com", false, "Unverified User");
 
+        _mockGoogleOAuthClient.Setup(c => c.ExchangeCodeAsync(code)).ReturnsAsync(tokenResponse);
         _mockGoogleTokenValidator.Setup(v => v.ValidateAsync(idToken)).ReturnsAsync(googleUser);
 
         // Act & Assert
         await Assert.ThrowsAsync<InvalidGoogleTokenException>(() =>
-            _authService.LoginWithGoogleAsync(idToken));
+            _authService.LoginWithGoogleAsync(code));
 
         _mockUserService.Verify(s => s.GetOrCreateUserAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         _mockJwtTokenService.Verify(j => j.GenerateToken(It.IsAny<User>()), Times.Never);
@@ -100,16 +112,37 @@ public class AuthServiceTests
     public async Task LoginWithGoogleAsync_GoogleValidatorThrows_ExceptionPropagates()
     {
         // Arrange
-        var idToken = "garbage-token";
+        var code = "valid-code";
+        var idToken = "garbage-id-token";
+        var tokenResponse = new GoogleTokenResponse(idToken, "access-token", "refresh-token", 3600, "openid email profile");
 
+        _mockGoogleOAuthClient.Setup(c => c.ExchangeCodeAsync(code)).ReturnsAsync(tokenResponse);
         _mockGoogleTokenValidator.Setup(v => v.ValidateAsync(idToken))
             .ThrowsAsync(new InvalidGoogleTokenException("Google ID token failed validation."));
 
         // Act & Assert
         await Assert.ThrowsAsync<InvalidGoogleTokenException>(() =>
-            _authService.LoginWithGoogleAsync(idToken));
+            _authService.LoginWithGoogleAsync(code));
 
         _mockUserService.Verify(s => s.GetOrCreateUserAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task LoginWithGoogleAsync_CodeExchangeThrows_ExceptionPropagatesAndDoesNotValidateToken()
+    {
+        // Arrange
+        var code = "bad-code";
+
+        _mockGoogleOAuthClient.Setup(c => c.ExchangeCodeAsync(code))
+            .ThrowsAsync(new InvalidGoogleTokenException("Google token exchange failed."));
+
+        // Act & Assert
+        await Assert.ThrowsAsync<InvalidGoogleTokenException>(() =>
+            _authService.LoginWithGoogleAsync(code));
+
+        _mockGoogleTokenValidator.Verify(v => v.ValidateAsync(It.IsAny<string>()), Times.Never);
+        _mockUserService.Verify(s => s.GetOrCreateUserAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        _mockJwtTokenService.Verify(j => j.GenerateToken(It.IsAny<User>()), Times.Never);
     }
 
     #endregion

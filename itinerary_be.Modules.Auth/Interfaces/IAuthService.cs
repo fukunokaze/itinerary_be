@@ -4,5 +4,5 @@ using itinerary_be.Modules.Auth.Models;
 
 public interface IAuthService
 {
-    Task<AuthResult> LoginWithGoogleAsync(string idToken);
+    Task<AuthResult> LoginWithGoogleAsync(string code);
 }
