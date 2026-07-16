@@ -3,6 +3,7 @@ using itinerary_be.Core.Domain.Enums;
 using itinerary_be.Infrastructure.Data;
 using itinerary_be.Modules.Auth;
 using itinerary_be.Modules.Itinerary;
+using itinerary_be.Modules.Utility;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -26,6 +27,9 @@ builder.Services.AddTripServices();
 // Add Auth services
 builder.Services.AddDataProtection();
 builder.Services.AddAuthServices(builder.Configuration);
+
+// Add Utility services (cross-cutting services depending on both Trip and Auth services)
+builder.Services.AddUtilityServices();
 
 var jwtIssuer = builder.Configuration["Jwt:Issuer"];
 var jwtAudience = builder.Configuration["Jwt:Audience"];

@@ -20,6 +20,7 @@
     <ProjectReference Include="..\itinerary_be.Modules.Auth\itinerary_be.Modules.Auth.csproj" />
     <ProjectReference Include="..\itinerary_be.Modules.Itinerary\itinerary_be.Modules.Itinerary.csproj" />
     <ProjectReference Include="..\itinerary_be.Modules.Logistics\itinerary_be.Modules.Logistics.csproj" />
+    <ProjectReference Include="..\itinerary_be.Modules.Utility\itinerary_be.Modules.Utility.csproj" />
     <ProjectReference Include="..\itinerary_be.Infrastructure\itinerary_be.Infrastructure.csproj" />
   </ItemGroup>
 
