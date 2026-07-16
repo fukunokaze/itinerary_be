@@ -5,6 +5,40 @@ Repository for My Itinerary backend
 
 The API authenticates users via Google Sign-In (ID token verification) and issues its own JWT for subsequent requests. All endpoints require this token except `POST /api/auth/google`. See [docs/google-oauth-setup.md](docs/google-oauth-setup.md) for Google Cloud Console setup and local secret configuration.
 
+## Running with Docker
+
+The full stack (Postgres + FluentMigrator migrations + WebAPI) can be run locally via `docker compose`, without installing the .NET SDK.
+
+### 1. Configure environment variables
+
+```
+cp .env.example .env
+```
+
+Edit `.env` and fill in `JWT_SECRET`, `GOOGLE_CLIENT_ID`, and `GOOGLE_CLIENT_SECRET` (see [docs/google-oauth-setup.md](docs/google-oauth-setup.md) for obtaining Google credentials). `.env` is gitignored — never commit real secrets. The Postgres and port settings have sensible defaults and don't need to be changed for local use.
+
+### 2. Start the stack
+
+```
+docker compose up --build
+```
+
+This brings up, in order:
+1. `postgres` — waits until healthy
+2. `migrator` — creates the database schema and applies all pending FluentMigrator migrations, then exits (safe to re-run; already-applied migrations are skipped)
+3. `webapi` — starts only after `migrator` completes successfully, listening on `http://localhost:8080` (or `WEBAPI_PORT` from `.env`)
+
+### 3. Fresh vs. existing database
+
+- **Fresh database**: the default `docker-compose.yml` setup — `postgres` starts with an empty named volume (`postgres-data`), and `migrator` creates the `itinerary` schema and all tables from scratch.
+- **Existing database**: point `ConnectionStrings__DefaultConnectionString` (in `docker-compose.yml`, or by overriding `POSTGRES_*` / running `postgres` externally) at your existing Postgres instance instead of the bundled container. The `migrator` service will apply only the migrations that haven't already run.
+
+To reset to a fresh database, stop the stack and remove the volume:
+
+```
+docker compose down -v
+```
+
 ## Architecture Overview
 
 This project follows Clean Architecture principles with clear separation of concerns:
