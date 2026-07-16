@@ -32,6 +32,8 @@ public static class AuthServiceRegistration
         services.AddScoped<IUserGoogleTokenRepository, UserGoogleTokenRepository>();
         services.AddScoped<IUserGoogleTokenService, UserGoogleTokenService>();
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IGoogleCalendarClient, GoogleCalendarClient>();
+        services.AddScoped<IGoogleCalendarService, GoogleCalendarService>();
 
         return services;
     }
