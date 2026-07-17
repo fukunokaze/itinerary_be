@@ -1,0 +1,109 @@
+name: CI/CD
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_VERSION: "10.0.x"
+  REGISTRY: ghcr.io
+
+jobs:
+  build-and-test:
+    name: Build & test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore
+        run: dotnet restore itinerary_be.slnx
+
+      - name: Build
+        run: dotnet build itinerary_be.slnx --no-restore -c Release
+
+      - name: Test
+        run: dotnet test itinerary_be.UnitTests --no-build -c Release --logger "trx;LogFileName=test-results.trx"
+
+      - name: Publish test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: "**/test-results.trx"
+
+  build-and-push:
+    name: Build & push images
+    needs: build-and-test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - image: webapi
+            dockerfile: itinerary_be.WebAPI/Dockerfile
+          - image: migrator
+            dockerfile: itinerary_be.Migration/Dockerfile
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & push ${{ matrix.image }}
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ github.repository }}-${{ matrix.image }}:latest
+            ${{ env.REGISTRY }}/${{ github.repository }}-${{ matrix.image }}:${{ github.sha }}
+          cache-from: type=gha,scope=${{ matrix.image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}
+
+  # deploy:
+  #   name: Deploy
+  #   needs: build-and-push
+  #   if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+  #   runs-on: ubuntu-latest
+  #   environment: production
+  #   steps:
+  #     # PLACEHOLDER: this step assumes a remote host reachable over SSH that already has
+  #     # docker-compose.prod.yml and a populated .env file (see .env.example) in
+  #     # DEPLOY_PATH. Set these repo/environment secrets before this job can run:
+  #     #   DEPLOY_HOST     - server hostname or IP
+  #     #   DEPLOY_USER     - SSH user
+  #     #   DEPLOY_SSH_KEY  - private key for that user (add the matching public key to
+  #     #                     the server's authorized_keys)
+  #     #   DEPLOY_PATH     - absolute path on the server containing docker-compose.prod.yml
+  #     # Swap this out entirely if you deploy to a different target (Azure, ECS, Fly.io, etc).
+  #     - name: Deploy over SSH
+  #       uses: appleboy/ssh-action@v1.2.0
+  #       with:
+  #         host: ${{ secrets.DEPLOY_HOST }}
+  #         username: ${{ secrets.DEPLOY_USER }}
+  #         key: ${{ secrets.DEPLOY_SSH_KEY }}
+  #         script: |
+  #           cd ${{ secrets.DEPLOY_PATH }}
+  #           docker compose -f docker-compose.prod.yml pull
+  #           docker compose -f docker-compose.prod.yml up -d
+  #           docker image prune -f
