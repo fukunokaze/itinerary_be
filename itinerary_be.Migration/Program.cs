@@ -13,6 +13,7 @@ class Program
         IConfigurationRoot configuration = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json")
+            .AddEnvironmentVariables()
             .Build();
 
         var connectionString = configuration.GetConnectionString("DefaultConnectionString");

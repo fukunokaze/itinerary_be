@@ -31,6 +31,10 @@ builder.Services.AddAuthServices(builder.Configuration);
 // Add Utility services (cross-cutting services depending on both Trip and Auth services)
 builder.Services.AddUtilityServices();
 
+// Add health checks
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<ItineraryDbContext>();
+
 var jwtIssuer = builder.Configuration["Jwt:Issuer"];
 var jwtAudience = builder.Configuration["Jwt:Audience"];
 var jwtSecret = builder.Configuration["Jwt:Secret"];
@@ -91,5 +95,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHealthChecks("/api/health").AllowAnonymous();
 
 app.Run();
