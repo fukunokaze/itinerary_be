@@ -4,7 +4,7 @@ metadata:
   name: itinerary-webapi
   namespace: itinerary
 spec:
-  type: NodePort
+  type: LoadBalancer
   selector:
     app: itinerary-webapi
   ports:
