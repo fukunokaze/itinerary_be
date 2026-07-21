@@ -85,7 +85,7 @@ jobs:
     needs: build-and-push
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    environment: production
+    # environment: production
     # Requires repo/environment secrets AZURE_CLIENT_ID, AZURE_TENANT_ID, AZURE_SUBSCRIPTION_ID
     # from an App Registration with a federated credential trusting this repo/branch (OIDC,
     # no stored client secret) and "Azure Kubernetes Service Cluster User Role" on the cluster.
