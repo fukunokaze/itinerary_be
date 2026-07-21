@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: itinerary-webapi
+  namespace: itinerary
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: itinerary-webapi
+  template:
+    metadata:
+      labels:
+        app: itinerary-webapi
+    spec:
+      imagePullSecrets:
+        - name: ghcr-creds
+      containers:
+        - name: webapi
+          image: ghcr.io/fukunokaze/itinerary_be-webapi:latest
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: itinerary-config
+          env:
+            - name: ConnectionStrings__DefaultConnectionString
+              valueFrom:
+                secretKeyRef:
+                  name: itinerary-secrets
+                  key: webapi-connection-string
+            - name: Jwt__Secret
+              valueFrom:
+                secretKeyRef:
+                  name: itinerary-secrets
+                  key: jwt-secret
+            - name: Google__ClientId
+              valueFrom:
+                secretKeyRef:
+                  name: itinerary-secrets
+                  key: google-client-id
+            - name: Google__ClientSecret
+              valueFrom:
+                secretKeyRef:
+                  name: itinerary-secrets
+                  key: google-client-secret
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 20

@@ -1,0 +1,22 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: itinerary-migrator
+  namespace: itinerary
+spec:
+  backoffLimit: 2
+  ttlSecondsAfterFinished: 300
+  template:
+    spec:
+      restartPolicy: Never
+      imagePullSecrets:
+        - name: ghcr-creds
+      containers:
+        - name: migrator
+          image: ghcr.io/fukunokaze/itinerary_be-migrator:latest
+          env:
+            - name: ConnectionStrings__DefaultConnectionString
+              valueFrom:
+                secretKeyRef:
+                  name: itinerary-secrets
+                  key: migrator-connection-string
