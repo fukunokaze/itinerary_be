@@ -80,30 +80,47 @@ jobs:
           cache-from: type=gha,scope=${{ matrix.image }}
           cache-to: type=gha,mode=max,scope=${{ matrix.image }}
 
-  # deploy:
-  #   name: Deploy
-  #   needs: build-and-push
-  #   if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-  #   runs-on: ubuntu-latest
-  #   environment: production
-  #   steps:
-  #     # PLACEHOLDER: this step assumes a remote host reachable over SSH that already has
-  #     # docker-compose.prod.yml and a populated .env file (see .env.example) in
-  #     # DEPLOY_PATH. Set these repo/environment secrets before this job can run:
-  #     #   DEPLOY_HOST     - server hostname or IP
-  #     #   DEPLOY_USER     - SSH user
-  #     #   DEPLOY_SSH_KEY  - private key for that user (add the matching public key to
-  #     #                     the server's authorized_keys)
-  #     #   DEPLOY_PATH     - absolute path on the server containing docker-compose.prod.yml
-  #     # Swap this out entirely if you deploy to a different target (Azure, ECS, Fly.io, etc).
-  #     - name: Deploy over SSH
-  #       uses: appleboy/ssh-action@v1.2.0
-  #       with:
-  #         host: ${{ secrets.DEPLOY_HOST }}
-  #         username: ${{ secrets.DEPLOY_USER }}
-  #         key: ${{ secrets.DEPLOY_SSH_KEY }}
-  #         script: |
-  #           cd ${{ secrets.DEPLOY_PATH }}
-  #           docker compose -f docker-compose.prod.yml pull
-  #           docker compose -f docker-compose.prod.yml up -d
-  #           docker image prune -f
+  deploy:
+    name: Deploy to AKS
+    needs: build-and-push
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    # Requires repo/environment secrets AZURE_CLIENT_ID, AZURE_TENANT_ID, AZURE_SUBSCRIPTION_ID
+    # from an App Registration with a federated credential trusting this repo/branch (OIDC,
+    # no stored client secret) and "Azure Kubernetes Service Cluster User Role" on the cluster.
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Set AKS context
+        uses: azure/aks-set-context@v4
+        with:
+          resource-group: trvl_pln_aks_group
+          cluster-name: trvl_pln_aks
+
+      - name: Apply base manifests
+        run: |
+          kubectl apply -f k8s/namespace.yaml
+          kubectl apply -f k8s/configmap.yaml
+          kubectl apply -f k8s/webapi-service.yaml
+
+      - name: Run DB migration
+        run: |
+          kubectl delete job itinerary-migrator -n itinerary --ignore-not-found
+          sed "s#:latest#:${{ github.sha }}#" k8s/migrator-job.yaml | kubectl apply -f -
+          kubectl wait --for=condition=complete job/itinerary-migrator -n itinerary --timeout=180s
+
+      - name: Deploy webapi
+        run: |
+          sed "s#:latest#:${{ github.sha }}#" k8s/webapi-deployment.yaml | kubectl apply -f -
+          kubectl rollout status deployment/itinerary-webapi -n itinerary --timeout=180s
